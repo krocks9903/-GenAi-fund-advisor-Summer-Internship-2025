@@ -1,34 +1,64 @@
-import yfinance as yf
-import pandas as pd
-import numpy as np
-from scipy import stats   
-fund      = "FGPMX"     
-benchmark = "^GSPC"      
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import json
 
-hist_fund = yf.download(fund, period="3y", interval="1d")["Close"]
-hist_bm   = yf.download(benchmark, period="3y", interval="1d")["Close"]
+def fetch_fund_risk_statistics(ticker):
+    url = f"https://finance.yahoo.com/quote/{ticker}/risk"
 
-r_fund = np.log(hist_fund).diff().dropna()
-r_mkt  = np.log(hist_bm).diff().dropna()
+    # Chrome options
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920x1080")
+    options.add_argument("--log-level=3")
+    options.add_argument("user-agent=Mozilla/5.0")
 
-df = pd.concat([r_fund, r_mkt], axis=1).dropna()
-df.columns = ["fund", "market"]
-TRADING_DAYS = 252        
+    driver = webdriver.Chrome(service=Service(), options=options)
 
-std_dev = df["fund"].std(ddof=0) * np.sqrt(TRADING_DAYS)
+    try:
+        print(f"Loading {url} ...")
+        driver.get(url)
 
-sharpe  = (df["fund"].mean() * TRADING_DAYS) / std_dev
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.TAG_NAME, "table"))
+        )
 
-slope, intercept, r_value, p_value, std_err = stats.linregress(df["market"], df["fund"])
-beta  = slope
-alpha = intercept * TRADING_DAYS    
-r2    = r_value**2
-metrics = {
-    "3y_std_dev" : round(std_dev*100, 2),    
-    "3y_sharpe"  : round(sharpe, 2),
-    "beta"       : round(beta, 2),
-    "alpha"      : round(alpha*100, 2),       
-    "r_squared"  : round(r2*100, 1),
-}
-clean_metrics = {k: float(v) for k, v in metrics.items()}
-print(clean_metrics)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        tables = soup.find_all("table")
+
+        target_table = None
+        for table in tables:
+            headers = [th.text.strip() for th in table.find_all("th")]
+            if "3 Years" in headers and "5 Years" in headers and "10 Years" in headers:
+                target_table = table
+                break
+
+        if not target_table:
+            print("Risk Statistics table not found.")
+            return {}
+
+        metrics = {}
+        rows = target_table.find_all("tr")
+        for row in rows[1:]:  
+            cols = row.find_all("td")
+            if len(cols) >= 6:  
+                metric = cols[0].text.strip()
+                metrics[metric] = {
+                    "3y": cols[1].text.strip(),
+                    "5y": cols[3].text.strip(),
+                    "10y": cols[5].text.strip(),
+                }
+
+        return metrics
+
+    finally:
+        driver.quit()
+
+if __name__ == "__main__":
+    result = fetch_fund_risk_statistics("FGPMX")
+    print(json.dumps(result, indent=2))
