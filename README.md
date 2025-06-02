@@ -1,89 +1,51 @@
+# Mutual Fund Risk Metrics Scraper
+
+## Overview
+
+This script scrapes publicly available risk and performance statistics for mutual funds from Yahoo Finance. The goal is to extract key metrics over 3-year, 5-year, and 10-year periods for use in downstream analysis, such as LLM-based recommendation systems or financial dashboards.
+
+The output is saved as structured JSON, mapping each fund's ticker symbol to its relevant performance metrics and benchmark comparisons.
 
 ---
 
-## Technologies Used
+## Sample Output Format
 
-### Backend
+Each fund is stored as a JSON object with time-based values for both the fund and its category average. For example:
 
-- Python 3.11+
-- Flask or FastAPI
-- BeautifulSoup, Selenium (for scraping)
-- pandas, NumPy (data cleaning and transformation)
-
-### AI & Retrieval
-
-- LangChain
-- OpenAI GPT-4 API
-- FAISS or Azure Cognitive Search
-- PromptLayer (optional for managing prompt logs)
-
-### Frontend
-
-- Streamlit (MVP UI)
-- Optionally React (under evaluation for future scalability)
-
-### Data Sources
-
-- [Yahoo Finance](https://finance.yahoo.com/)
-- [Morningstar](https://www.morningstar.com/)
-- [Fidelity](https://www.fidelity.com/)
-
----
-
-## Modules
-
-### 1. Data Acquisition
-
-Scrapes financial metrics and fund profiles for mutual funds. Focuses on metrics such as:
-
-- Sharpe Ratio
-- Sortino Ratio
-- Mean Annual Return
-- Alpha / Beta
-- Expense Ratio
-- Max Drawdown
-- Treynor Ratio
-- Standard Deviation
-- # of Years Up/Down (when available)
-
-### 2. Data Preprocessing
-
-Cleans and transforms scraped data into a structured format (JSON or CSV) for RAG indexing and LLM input.
-
-### 3. Vector Store & Retrieval
-
-Fund documents or summaries are chunked, embedded (e.g., with `text-embedding-ada-002`), and stored in a vector database (FAISS or Azure Vector DB). Used by LangChain retrievers.
-
-### 4. RAG + GPT Integration
-
-Queries are matched with stored vector chunks and passed to OpenAI's GPT-4 for generating responses. Prompt templates are used to enforce format, style, and explainability.
-
-### 5. Recommendation Interface
-
-The front-end dashboard accepts user-selected risk levels (e.g., Low / Medium / High) and renders fund recommendations ranked by metrics relevant to that profile.
-
----
-
-## Collaboration with Business Team
-
-- Business team defines client risk profiles and ranking strategies
-- Technical team implements metric extraction and scoring engine
-- Joint evaluation of model outputs to improve prompt design and data sourcing
-- Weekly syncs held for use-case alignment, bug tracking, and UI/UX feedback
-
----
-
-## Setup Instructions (Coming Soon)
-
-This section will include:
-
-- Environment setup
-- API key integration (OpenAI, vector DB)
-- Running the Streamlit app locally
-- How to test and validate recommendations
-
----
-
-## License
-
-This project is under active research and development. It is currently closed-source and intended for internal, educational, and non-commercial use.
+```json
+{
+  "VGTSX": {
+    "Mean Annual Return": {
+      "3y_fund": "0.75",
+      "3y_avg": "0.01",
+      "5y_fund": "0.92",
+      "5y_avg": "0.01",
+      "10y_fund": "0.5",
+      "10y_avg": "0.01"
+    },
+    "Standard Deviation": {
+      "3y_fund": "16.33",
+      "3y_avg": "0.18",
+      "5y_fund": "15.46",
+      "5y_avg": "0.15",
+      "10y_fund": "15.09",
+      "10y_avg": "0.15"
+    },
+    "Sharpe Ratio": {
+      "3y_fund": "0.27",
+      "3y_avg": "0",
+      "5y_fund": "0.53",
+      "5y_avg": "0.01",
+      "10y_fund": "0.26",
+      "10y_avg": "0"
+    },
+    "Treynor Ratio": {
+      "3y_fund": "3.16",
+      "3y_avg": "0.07",
+      "5y_fund": "7.38",
+      "5y_avg": "0.09",
+      "10y_fund": "2.93",
+      "10y_avg": "0.05"
+    }
+  }
+}
