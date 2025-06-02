@@ -1,51 +1,90 @@
-# GenAI Fund Recommendation Tool
 
-## Overview
+---
 
-This project is a proof-of-concept (POC) AI-powered tool designed to assist financial advisors in recommending suitable investment funds based on individual client risk profiles. By integrating public financial data with large language models, the system generates clear, human-readable fund summaries and recommendations tailored to varying risk levels.
+## Technologies Used
 
-## Features
+### Backend
 
-- Collects fund data from trusted public sources such as Yahoo Finance and Morningstar
-- Cleans and processes key metrics (e.g., Sharpe Ratio, Expense Ratio, Beta, Returns)
-- Integrates with OpenAI's GPT to generate personalized fund recommendations
-- Provides a user interface for financial advisors to select risk level and fund category
-- Displays AI-generated summaries and justifications to aid advisor decision-making
+- Python 3.11+
+- Flask or FastAPI
+- BeautifulSoup, Selenium (for scraping)
+- pandas, NumPy (data cleaning and transformation)
 
-## Tech Stack
+### AI & Retrieval
 
-- **Frontend:** Streamlit or React (under evaluation)
-- **Backend:** Python, Flask or FastAPI
-- **Data Handling:** yfinance, BeautifulSoup, pandas, NumPy
-- **AI Integration:** OpenAI API, LangChain (for prompt management)
-- **Storage:** CSV/JSON for local data; Azure Blob or AWS S3 (cloud-ready)
-- **Version Control:** Git + GitHub
+- LangChain
+- OpenAI GPT-4 API
+- FAISS or Azure Cognitive Search
+- PromptLayer (optional for managing prompt logs)
+
+### Frontend
+
+- Streamlit (MVP UI)
+- Optionally React (under evaluation for future scalability)
+
+### Data Sources
+
+- [Yahoo Finance](https://finance.yahoo.com/)
+- [Morningstar](https://www.morningstar.com/)
+- [Fidelity](https://www.fidelity.com/)
+
+---
 
 ## Modules
 
-1. **Data Acquisition**  
-   Collects fund performance metrics, fact sheets, and financial ratios from public sources.
+### 1. Data Acquisition
 
-2. **Data Preprocessing**  
-   Cleans, filters, and formats data for AI consumption using pandas and NumPy.
+Scrapes financial metrics and fund profiles for mutual funds. Focuses on metrics such as:
 
-3. **GenAI Integration**  
-   Sends cleaned fund data to OpenAI’s GPT model and returns personalized recommendations with reasoning.
+- Sharpe Ratio
+- Sortino Ratio
+- Mean Annual Return
+- Alpha / Beta
+- Expense Ratio
+- Max Drawdown
+- Treynor Ratio
+- Standard Deviation
+- # of Years Up/Down (when available)
 
-4. **User Interface**  
-   Allows advisors to input client risk level and view fund summaries and recommendations in an interactive dashboard.
+### 2. Data Preprocessing
+
+Cleans and transforms scraped data into a structured format (JSON or CSV) for RAG indexing and LLM input.
+
+### 3. Vector Store & Retrieval
+
+Fund documents or summaries are chunked, embedded (e.g., with `text-embedding-ada-002`), and stored in a vector database (FAISS or Azure Vector DB). Used by LangChain retrievers.
+
+### 4. RAG + GPT Integration
+
+Queries are matched with stored vector chunks and passed to OpenAI's GPT-4 for generating responses. Prompt templates are used to enforce format, style, and explainability.
+
+### 5. Recommendation Interface
+
+The front-end dashboard accepts user-selected risk levels (e.g., Low / Medium / High) and renders fund recommendations ranked by metrics relevant to that profile.
+
+---
 
 ## Collaboration with Business Team
 
-- Business team defines client risk profiles and mapping logic
-- Provides criteria for fund evaluation and use case scenarios
-- Reviews and validates AI-generated summaries and fund suggestions
-- Regular syncs are held to align on logic, UX feedback, and prompt refinement
+- Business team defines client risk profiles and ranking strategies
+- Technical team implements metric extraction and scoring engine
+- Joint evaluation of model outputs to improve prompt design and data sourcing
+- Weekly syncs held for use-case alignment, bug tracking, and UI/UX feedback
 
-## Getting Started
+---
 
-> This section will be updated when development begins in Week 3. It will include instructions for setting up the environment, installing dependencies, and running the local version of the tool.
+## Setup Instructions (Coming Soon)
+
+This section will include:
+
+- Environment setup
+- API key integration (OpenAI, vector DB)
+- Running the Streamlit app locally
+- How to test and validate recommendations
+
+---
 
 ## License
 
-This project is currently under internal development for educational and research purposes.
+This project is under active research and development. It is currently closed-source and intended for internal, educational, and non-commercial use.
+
