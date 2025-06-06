@@ -2,6 +2,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+import json
 
 tickers = {
     "Conservative": ["VWELX", "VBTLX", "AGG"],
@@ -87,5 +88,5 @@ for category, symbol_list in tickers.items():
                 "Sortino (Annualized)": sortino_display
             })
 
-df = pd.DataFrame(results)
-print(df.to_string(index=False))
+print(json.dumps(results, indent=2))
+
