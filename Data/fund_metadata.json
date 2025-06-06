@@ -1,0 +1,62 @@
+{
+  "VWELX": {
+    "name": "Vanguard Wellington Fund",
+    "category": "Conservative Allocation",
+    "inception_date": "1929-07-01",
+    "aum": "129.4B"
+  },
+  "VBTLX": {
+    "name": "Vanguard Total Bond Market Index Fund",
+    "category": "Intermediate-Term Bond",
+    "inception_date": "1986-12-11",
+    "aum": "326.7B"
+  },
+  "AGG": {
+    "name": "iShares Core U.S. Aggregate Bond ETF",
+    "category": "Intermediate-Term Bond",
+    "inception_date": "2003-09-22",
+    "aum": "104.5B"
+  },
+  "VFIAX": {
+    "name": "Vanguard 500 Index Fund Admiral Shares",
+    "category": "Large Blend",
+    "inception_date": "2000-11-13",
+    "aum": "405.0B"
+  },
+  "VTMFX": {
+    "name": "Vanguard Tax-Managed Balanced Fund",
+    "category": "Moderate Allocation",
+    "inception_date": "1994-09-01",
+    "aum": "9.4B"
+  },
+  "PRBLX": {
+    "name": "Parnassus Core Equity Fund",
+    "category": "Large Blend (ESG)",
+    "inception_date": "1992-08-31",
+    "aum": "20.8B"
+  },
+  "FSPTX": {
+    "name": "Fidelity Select Semiconductors Portfolio",
+    "category": "Technology Sector",
+    "inception_date": "1985-07-29",
+    "aum": "8.7B"
+  },
+  "VSMAX": {
+    "name": "Vanguard Small-Cap Index Fund Admiral Shares",
+    "category": "Small Blend",
+    "inception_date": "2000-11-13",
+    "aum": "125.6B"
+  },
+  "VTIAX": {
+    "name": "Vanguard Total International Stock Index Fund",
+    "category": "Foreign Large Blend",
+    "inception_date": "2010-11-29",
+    "aum": "416.9B"
+  },
+  "FCPGX": {
+    "name": "Fidelity Small Cap Growth Fund",
+    "category": "Small Growth",
+    "inception_date": "1998-11-06",
+    "aum": "5.3B"
+  }
+}
