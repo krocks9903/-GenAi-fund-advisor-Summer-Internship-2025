@@ -11,30 +11,21 @@ tickers = {
 }
 
 risk_free_rate = 0.02  
-# Min trading days
 min_rows_per_year = {3: 50, 5: 125, 10: 250}
 periods = [3, 5, 10]
 
-
 def calculate_sortino_annual(returns, daily_mar):
-
     daily_excess = returns - daily_mar
-
     downside_returns = returns[returns < daily_mar]
     if len(downside_returns) == 0:
         return np.inf
-
     daily_downside_dev = np.sqrt(np.mean((downside_returns - daily_mar) ** 2))
-
     daily_excess_mean = np.mean(daily_excess)
-
     annual_excess   = daily_excess_mean   * 252
     annual_downside = daily_downside_dev  * np.sqrt(252)
-
     if annual_downside == 0:
         return np.inf
     return annual_excess / annual_downside
-
 
 results = []
 
@@ -44,7 +35,6 @@ for category, symbol_list in tickers.items():
             end_date = datetime.today()
             start_date = end_date - timedelta(days=365 * yrs)
 
-            # === 2. Download historical data from yfinance ===
             data = yf.download(
                 symbol,
                 start=start_date.strftime("%Y-%m-%d"),
@@ -52,7 +42,6 @@ for category, symbol_list in tickers.items():
                 progress=False,
             )
 
-            # MultiIndex 
             if isinstance(data.columns, pd.MultiIndex):
                 data.columns = data.columns.get_level_values(0)
 
@@ -68,11 +57,8 @@ for category, symbol_list in tickers.items():
                 })
                 continue
 
-            # daily returns and MAR
             data["Return"] = data["Close"].pct_change().dropna()
             returns = data["Return"].dropna()
-
-            # risk‐free to daily MAR
             daily_mar = risk_free_rate / 252
 
             sortino_ann = calculate_sortino_annual(returns, daily_mar)
@@ -90,3 +76,5 @@ for category, symbol_list in tickers.items():
 
 print(json.dumps(results, indent=2))
 
+with open("sortino.json", "w") as f:
+    json.dump(results, f, indent=2)
