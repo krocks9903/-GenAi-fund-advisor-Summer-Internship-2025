@@ -1,32 +1,42 @@
 import os
+import json
 from dotenv import load_dotenv
-from langchain_community.document_loaders import JSONLoader
+from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
-# Define JSON file paths
-base_path = "Data"
+# Define the list of JSON files in your Data folder
 file_paths = [
-    os.path.join(base_path, "Definitions.json"),
-    os.path.join(base_path, "fund_metadata.json"),
-    os.path.join(base_path, "fund_risk_metrics.json"),
+    "Data/fund_risk_metrics.json",
+    "Data/fund_metadata.json",
+    "Data/Definitions.json"
 ]
 
-# Load all JSON files into a single list of documents
 docs = []
+
 for path in file_paths:
-    loader = JSONLoader(file_path=path, jq_schema=".", text_content=False)
-    docs.extend(loader.load())
+    with open(path, "r") as f:
+        data = json.load(f)
 
-# Split the documents into chunks
-splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=50)
-chunks = splitter.split_documents(docs)
+    # Determine document format based on structure
+    if isinstance(data, dict):
+        # If JSON is a dictionary (like ticker -> metrics)
+        for key, content in data.items():
+            doc_text = f"{key}\n{json.dumps(content, indent=2)}"
+            docs.append(Document(page_content=doc_text, metadata={"source": os.path.basename(path)}))
+    elif isinstance(data, list):
+        # If JSON is a list (e.g., definitions or general entries)
+        for entry in data:
+            doc_text = json.dumps(entry, indent=2)
+            docs.append(Document(page_content=doc_text, metadata={"source": os.path.basename(path)}))
+    else:
+        # Skip unsupported formats
+        print(f"Skipped: {path} (unsupported structure)")
 
-# Initialize Azure OpenAI Embeddings
+# Initialize embeddings
 embedding = AzureOpenAIEmbeddings(
     model="text-embedding-ada-002",
     deployment=os.getenv("AZURE_EMBED_DEPLOYMENT"),
@@ -36,11 +46,8 @@ embedding = AzureOpenAIEmbeddings(
     openai_api_version=os.getenv("AZURE_EMBED_VERSION"),
 )
 
-# Create FAISS index from the document chunks
-vectorstore = FAISS.from_documents(chunks, embedding)
-
-# Save the FAISS index locally
+# Build and save FAISS index
+vectorstore = FAISS.from_documents(docs, embedding)
 vectorstore.save_local("faiss_index_fund_data")
 
-print("Indexing complete. FAISS database saved to 'faiss_index_fund_data'.")
-# This script loads JSON files, splits them into chunks, creates a FAISS index using Azure OpenAI embeddings,
+print(f"Indexed {len(docs)} documents across {len(file_paths)} files. Saved to 'faiss_index_fund_data'.")
