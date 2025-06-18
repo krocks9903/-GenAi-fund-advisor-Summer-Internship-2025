@@ -5,10 +5,11 @@ from datetime import datetime, timedelta
 import json
 
 tickers = {
-    "Conservative": ["VWELX", "VBTLX", "AGG"],
-    "Moderate":     ["VFIAX", "VTMFX", "PRBLX"],
+    "Conservative": ["VWELX", "VBTLX", "AGG", "FTBFX", "BOND", "VCIT"],
+    "Moderate":     ["VFIAX", "VTMFX", "PRBLX", "MAMOX", "FMTIX", "VBAIX"],
     "Aggressive":   ["FSPTX", "VSMAX", "VTIAX", "FCPGX"]
 }
+
 
 risk_free_rate = 0.02  
 min_rows_per_year = {3: 50, 5: 125, 10: 250}

@@ -1,0 +1,290 @@
+[
+  {
+    "Category": "Conservative",
+    "Ticker": "VWELX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.9206
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VWELX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.6832
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VWELX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.5534
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VBTLX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.1535
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VBTLX",
+    "Years": 5,
+    "Sortino (Annualized)": -0.4865
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VBTLX",
+    "Years": 10,
+    "Sortino (Annualized)": -0.047
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "AGG",
+    "Years": 3,
+    "Sortino (Annualized)": 0.1269
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "AGG",
+    "Years": 5,
+    "Sortino (Annualized)": -0.4574
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "AGG",
+    "Years": 10,
+    "Sortino (Annualized)": -0.0432
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "FTBFX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.347
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "FTBFX",
+    "Years": 5,
+    "Sortino (Annualized)": -0.2683
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "FTBFX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.1386
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "BOND",
+    "Years": 3,
+    "Sortino (Annualized)": 0.2594
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "BOND",
+    "Years": 5,
+    "Sortino (Annualized)": -0.3688
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "BOND",
+    "Years": 10,
+    "Sortino (Annualized)": 0.0155
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VCIT",
+    "Years": 3,
+    "Sortino (Annualized)": 0.4976
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VCIT",
+    "Years": 5,
+    "Sortino (Annualized)": -0.1958
+  },
+  {
+    "Category": "Conservative",
+    "Ticker": "VCIT",
+    "Years": 10,
+    "Sortino (Annualized)": 0.185
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VFIAX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.9763
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VFIAX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.7913
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VFIAX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.6097
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VTMFX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.9868
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VTMFX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.661
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VTMFX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.5651
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "PRBLX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.9387
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "PRBLX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.781
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "PRBLX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.619
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "MAMOX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.901
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "MAMOX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.6343
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "MAMOX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.4529
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "FMTIX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.7387
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "FMTIX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.4671
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "FMTIX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.3802
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VBAIX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.9005
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VBAIX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.6004
+  },
+  {
+    "Category": "Moderate",
+    "Ticker": "VBAIX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.5398
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FSPTX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.96
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FSPTX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.6662
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FSPTX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.7164
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VSMAX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.5371
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VSMAX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.5086
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VSMAX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.3498
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VTIAX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.753
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VTIAX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.5454
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "VTIAX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.2773
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FCPGX",
+    "Years": 3,
+    "Sortino (Annualized)": 0.6
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FCPGX",
+    "Years": 5,
+    "Sortino (Annualized)": 0.415
+  },
+  {
+    "Category": "Aggressive",
+    "Ticker": "FCPGX",
+    "Years": 10,
+    "Sortino (Annualized)": 0.4195
+  }
+]
