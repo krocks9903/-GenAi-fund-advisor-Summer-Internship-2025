@@ -17,6 +17,24 @@
     "inception_date": "2003-09-22",
     "aum": "104.5B"
   },
+  "FTBFX": {
+    "name": "Fidelity Total Bond Fund",
+    "category": "Intermediate-Term Bond",
+    "inception_date": "2002-10-15",
+    "aum": "37.4B"
+  },
+  "BOND": {
+    "name": "PIMCO Active Bond ETF",
+    "category": "Intermediate-Term Bond",
+    "inception_date": "2012-02-29",
+    "aum": "3.1B"
+  },
+  "VCIT": {
+    "name": "Vanguard Intermediate-Term Corporate Bond ETF",
+    "category": "Corporate Bond",
+    "inception_date": "2009-11-19",
+    "aum": "54.8B"
+  },
   "VFIAX": {
     "name": "Vanguard 500 Index Fund Admiral Shares",
     "category": "Large Blend",
@@ -34,6 +52,24 @@
     "category": "Large Blend (ESG)",
     "inception_date": "1992-08-31",
     "aum": "20.8B"
+  },
+  "MAMOX": {
+    "name": "BlackRock Advantage Large Cap Core Fund",
+    "category": "Large Blend",
+    "inception_date": "1991-11-13",
+    "aum": "2.0B"
+  },
+  "FMTIX": {
+    "name": "Fidelity Total Market Index Fund",
+    "category": "Large Blend",
+    "inception_date": "1997-09-18",
+    "aum": "53.9B"
+  },
+  "VBAIX": {
+    "name": "Vanguard Balanced Index Fund Admiral Shares",
+    "category": "Moderate Allocation",
+    "inception_date": "2000-11-13",
+    "aum": "68.7B"
   },
   "FSPTX": {
     "name": "Fidelity Select Semiconductors Portfolio",
