@@ -1,1 +1,10 @@
 .env
+output/
+Pdfs/files/
+functions
+chromedriver.exe
+faiss_index_fund_data/
+*.pdf
+*.pyc
+__pycache__/
+venv/
