@@ -1,0 +1,2 @@
+streamlit run Scripts\App.py
+ python scripts\MaxDrawdown.py

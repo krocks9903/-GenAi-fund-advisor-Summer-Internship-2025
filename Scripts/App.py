@@ -115,7 +115,11 @@ if st.session_state.memory.chat_memory.messages:
         """, unsafe_allow_html=True)
 
 # User query input
-query = st.text_input("Your Question", placeholder="E.g. What is Sortino Ratio? Or Compare PRBLX and FSPTX")
+query = st.text_area(
+    "Your Question", 
+    placeholder="E.g. What is Sortino Ratio? Or Compare PRBLX and FSPTX",
+    height=100
+)
 
 if query:
     result = st.session_state.qa_chain.invoke({"question": query})

@@ -1,0 +1,18 @@
+{
+  "Conservative": {
+    "VWELX": "Vanguard Wellington Fund",
+    "AGG": "iShares Core U.S. Aggregate Bond ETF",
+    "VBTLX": "Vanguard Total Bond Market Index Fund"
+  },
+  "Moderate": {
+    "VFIAX": "Vanguard 500 Index Fund Admiral Shares",
+    "VTMFX": "Vanguard Tax-Managed Balanced Fund",
+    "PRBLX": "Parnassus Core Equity Fund"
+  },
+  "Aggressive": {
+    "FSPTX": "Fidelity Select Semiconductors Portfolio",
+    "VSMAX": "Vanguard Small-Cap Index Fund Admiral Shares",
+    "VTIAX": "Vanguard Total International Stock Index Fund",
+    "FCPGX": "Fidelity Small Cap Growth Fund"
+  }
+}
