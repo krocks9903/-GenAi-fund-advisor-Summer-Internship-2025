@@ -2,11 +2,11 @@
 
 ## Project Description
 
-The GenAI Fund Recommendation Platform is a proof-of-concept application that aims to assist financial advisors in generating personalized mutual fund recommendations based on a client's risk profile. By leveraging public financial data sources and combining them with large language models via a RAG (Retrieval-Augmented Generation) architecture, this tool delivers explainable, data-backed investment insights.
+The GenAI Fund Recommendation Platform is a proof-of-concept tool built to help financial advisors generate **personalized mutual fund recommendations** based on a client's risk profile. Using public financial data and combining it with Large Language Models through a RAG (Retrieval-Augmented Generation) approach, the platform delivers explainable and data-backed fund insights.
 
-This project merges traditional financial metric analysis with modern generative AI and retrieval pipelines, allowing users to surface relevant, context-aware fund summaries across various risk tolerance levels (Low, Medium, High).
+The project blends **traditional financial metrics** with **modern generative AI pipelines**, letting users explore fund suggestions aligned to different risk levels: Conservative, Moderate, and Aggressive.
 
-The core goal is to automate and enhance the advisor's workflow by converting raw financial data into personalized, interpretable, and auditable recommendations.
+The goal is to **enhance and automate** the advisor workflow by turning raw financial data into personalized, interpretable, and traceable recommendations.
 
 ---
 
@@ -14,30 +14,30 @@ The core goal is to automate and enhance the advisor's workflow by converting ra
 
 ### Backend
 
-- Python 3.11+
-- Flask or FastAPI
-- BeautifulSoup, Selenium (for web scraping)
-- pandas, NumPy (for data cleaning and metric processing)
+* Python 3.11+
+* Flask or FastAPI
+* BeautifulSoup (for web scraping)
+* pandas, NumPy (for data processing)
 
 ### AI & Retrieval
 
-- LangChain (RAG pipeline and orchestration)
-- OpenAI GPT-4 API
-- FAISS or Azure Cognitive Search (vector store for retrieval)
-- PromptLayer (optional logging of prompts and completions)
+* LangChain (RAG orchestration)
+* OpenAI GPT-4 API
+* FAISS or Azure Cognitive Search (vector retrieval)
+* PromptLayer (optional prompt tracking)
 
 ### Frontend
 
-- Streamlit (MVP interactive dashboard)
-- React (future-ready scalable interface, under evaluation)
+* Streamlit (interactive MVP dashboard)
+* React (planned for future scalable frontend)
 
 ### Data Sources
 
-- [Yahoo Finance](https://finance.yahoo.com/)
-- [Morningstar](https://www.morningstar.com/)
-- [Fidelity](https://www.fidelity.com/)
+* [Yahoo Finance](https://finance.yahoo.com/)
+* [Morningstar](https://www.morningstar.com/)
+* [Fidelity](https://www.fidelity.com/)
 
-These sources provide access to key fund performance and risk metrics such as Sharpe Ratio, Standard Deviation, and Treynor Ratio.
+These sources provide access to core metrics like Sharpe Ratio, Sortino Ratio, and Max Drawdown.
 
 ---
 
@@ -45,61 +45,73 @@ These sources provide access to key fund performance and risk metrics such as Sh
 
 ### 1. Data Acquisition
 
-Scrapes financial and risk metrics for mutual funds from public websites. Currently focused on:
+Scrapes mutual fund data from public sources and collects key financial risk/return metrics:
 
-- Sharpe Ratio  
-- Sortino Ratio  
-- Mean Annual Return  
-- Alpha / Beta  
-- Expense Ratio  
-- Max Drawdown  
-- Treynor Ratio  
-- Standard Deviation  
-- Number of Years Up/Down (if available)
+* Mean Annual Return
+* Sharpe Ratio
+* Sortino Ratio
+* Alpha & Beta
+* Expense Ratio
+* Max Drawdown
+* Treynor Ratio
+* Standard Deviation
 
 ### 2. Data Preprocessing
 
-Raw HTML content is parsed and cleaned using `BeautifulSoup`. Extracted data is normalized into structured JSON format with consistent naming and typing. This makes the data usable for vector indexing and LLM input.
+Scraped HTML content is cleaned and parsed into a **normalized JSON format**, with consistent field names and types. This structured format feeds the vector store and LLM pipeline.
 
 ### 3. Vector Store & Retrieval
 
-Processed fund data (including summaries, metric explanations, etc.) is embedded using OpenAI's `text-embedding-ada-002` and indexed using FAISS or Azure's Cognitive Search. Retrieval is optimized for similarity-based matching at query time.
+The cleaned JSON data is embedded using OpenAI's `text-embedding-ada-002`, and indexed using **FAISS** or **Azure Cognitive Search**. LangChain retrieves contextually relevant snippets based on user queries.
 
 ### 4. RAG + GPT Integration
 
-LangChain handles the prompt pipeline:
-- The user query (e.g., "Show best low-risk funds") is matched to relevant vector chunks
-- Retrieved documents are injected into prompt templates
-- GPT-4 generates a personalized, explainable recommendation based on both raw data and learned patterns
+LangChain orchestrates the full pipeline:
+
+* User query (e.g., "Top conservative funds") is matched to relevant data
+* Retrieved chunks are passed into a prompt
+* GPT-4 generates a **personalized and explainable** response using both structured data and natural language reasoning
 
 ### 5. Recommendation Interface
 
-A simple Streamlit UI allows users (e.g., financial advisors) to:
-- Input client risk level (Low / Medium / High)
-- Trigger fund comparison
-- View structured fund data and LLM-generated recommendations
+The Streamlit interface allows users (e.g., advisors or interns) to:
+
+* Input a risk level (Conservative / Moderate / Aggressive)
+* View fund metrics and AI-generated recommendations
+* Export outputs (PDF coming soon)
 
 ---
 
 ## Collaboration with Business Team
 
-- Business stakeholders define and refine the client risk segmentation logic
-- They provide the ranking criteria and validate scraped metrics
-- Collaboration ensures that the generated recommendations align with practical expectations
-- Weekly working sessions are used for feedback, iteration, and logic validation
+* The business team defines the logic for risk categories
+* They review and validate scraped data and metrics
+* They provide real-world use cases and ensure outputs are usable in advisor workflows
+* Weekly syncs help iterate quickly and refine priorities
 
 ---
 
 ## Setup Instructions (Coming Soon)
 
-This section will include:
+* Clone the repo and set up virtual environment
+* Install dependencies
+* Configure API keys (.env file for OpenAI, Azure, etc.)
+* Run the scraper and generate JSON
+* Start Streamlit app to test recommendations
 
-- How to clone and set up the environment
-- How to install dependencies
-- Setting up API keys (e.g., OpenAI, vector DB)
-- Running the scraper and data preprocessor
-- Starting the Streamlit app
-- Using test prompts and validating RAG outputs
+---
+
+## Sample Prompts
+
+These are example queries that financial advisors or end users might enter into the interface:
+
+* "Show the top 3 conservative mutual funds for a retired investor"
+* "Compare VFIAX and VWELX on risk-adjusted return over 10 years"
+* "Explain why VSMAX is considered an aggressive option"
+* "Which fund had the lowest max drawdown among moderate-risk funds?"
+* "Summarize performance of FCPGX including Sharpe and Treynor ratios"
+
+These prompts are processed by the LLM through LangChain's RAG flow, where it retrieves relevant fund metrics and generates a tailored response.
 
 ---
 
@@ -144,3 +156,6 @@ Sample output for a fund (e.g., `VGTSX`) from the scraper:
     }
   }
 }
+```
+
+
