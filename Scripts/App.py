@@ -8,10 +8,10 @@ from langchain.prompts import PromptTemplate
 import streamlit as st
 from fpdf import FPDF
 
-# Load environment variables
+# --- Load environment variables
 load_dotenv()
 
-# Initialize embeddings
+# --- Initialize embeddings
 embedding = AzureOpenAIEmbeddings(
     model="text-embedding-ada-002",
     azure_endpoint=os.getenv("AZURE_API_BASE"),
@@ -21,7 +21,7 @@ embedding = AzureOpenAIEmbeddings(
     chunk_size=1000,
 )
 
-# Load FAISS index and set up retriever
+# --- Load FAISS index and set up retriever
 vectorstore = FAISS.load_local(
     "faiss_index_fund_data",
     embedding,
@@ -29,7 +29,7 @@ vectorstore = FAISS.load_local(
 )
 retriever = vectorstore.as_retriever()
 
-# Configure Azure OpenAI chat model
+# --- Configure Azure OpenAI chat model
 llm = AzureChatOpenAI(
     deployment_name=os.getenv("AZURE_CHAT_DEPLOYMENT"),
     model="gpt-4.1",
@@ -38,44 +38,48 @@ llm = AzureChatOpenAI(
     api_version=os.getenv("AZURE_CHAT_VERSION"),
     temperature=0,
 )
-
-# Streamlit page configuration
-st.set_page_config(page_title="GenAI Fund Advisor", layout="wide")
-st.markdown("<h1 style='color:#f97316;'>GenAI Fund Advisor</h1>", unsafe_allow_html=True)
-st.markdown("Ask questions about mutual funds, definitions, or risk metrics.")
-
-# Clear conversation button
-if st.button("Clear Conversation"):
-    for key in ("memory", "qa_chain"):
-        if key in st.session_state:
-            del st.session_state[key]
-    st.rerun()
-
-
 custom_prompt = PromptTemplate.from_template("""
-You are a financial assistant helping users with mutual fund questions.
+You are an expert mutual fund assistant. For any question about a specific ticker or fund, use this rigorous chain-of-thought reasoning:
 
-You have access to:
-- Definitions of terms (e.g., Sortino, Sharpe)
-- Fund risk metrics (Sharpe, Sortino, Treynor, Std Dev)
-- Fund metadata (inception date, AUM, expense ratio)
+Step 1: Identify user intent and which ticker(s) or fund(s) are referenced.
 
-Before answering, use chain-of-thought reasoning:
+Step 2: Retrieve and present the most relevant sections from each fund's prospectus summary:
+- For risk questions: Use "Principal Risks" and risk disclosures.
+- For investment approach: Use "Investment Objective" and "Strategy".
+- For cost questions: Use "Fees and Expenses".
+- For suitability: Use "Who Should Invest".
+- For returns: Use "Performance" and historical data.
 
-STEP 1: Identify the question type:
-  - Definition/info question? ("What is AUM?")
-  - Fund comparison? ("Compare VWELX vs VFIAX")
-  - Fund recommendation? ("Suggest a low-risk long-term fund")
+Step 3: Supplement your answer with key quantitative risk metrics and fund metadata:
+- **Alpha:** Indicates outperformance vs. benchmark.
+  - Positive alpha: Fund beat its benchmark (good).
+  - Negative alpha: Fund lagged benchmark (bad).
+- **Sharpe Ratio:** Return per unit of total risk.
+  - Positive: Fund outperformed the risk-free rate (good, higher is better).
+  - Negative: Underperformed risk-free rate; took risk but lost money.
+- **Sortino Ratio:** Like Sharpe but penalizes only downside risk.
+  - Positive: Good risk-adjusted performance.
+  - Negative: High downside risk or negative returns.
+- **Treynor Ratio:** Return per unit of market risk (beta).
+  - Positive: Compensated for market risk.
+  - Negative: Took market risk but underperformed risk-free rate.
+- **Standard Deviation:** Measures volatility.
+  - Higher = more volatile, riskier.
+  - Lower = more stable.
+- **Max Drawdown:** Greatest observed loss from a peak to a trough.
+- **Expense Ratio, AUM, Inception Date, etc.**
 
-STEP 2: Handle accordingly:
-  - For definitions: Explain the term from context.
-  - For comparisons: Compare metrics from context across funds.
-  - For recommendations:
-      a. Infer user profile (risk, time horizon, ESG, etc.)
-      b. Filter based on context metrics (Sortino, Sharpe, Expense, etc.)
-      c. Recommend and justify based on real data.
+Step 4: If any risk metric is negative, always explain what that means for the user.
+  - E.g., "A negative Sharpe ratio means the fund underperformed safe assets and took on unnecessary risk."
 
-If context is missing, reply: "That information is not available in the provided context."
+Step 5: Structure your answer:
+- **Start with the relevant prospectus summary** for official narrative and disclosures.
+- **Follow with a table or bullet points** of quantitative data, including risk metrics and fees.
+- **Interpret results in plain language, especially if metrics are negative or unusually high/low.**
+- Offer practical insights or suitability if possible (e.g., “This fund may not be suitable for conservative investors given its high volatility.”)
+
+Step 6: If any requested data is missing, reply:  
+"That information is not available in the provided context."
 
 Context:
 {context}
@@ -84,7 +88,19 @@ Question:
 {question}
 """)
 
-# Initialize memory and QA chain
+# --- Streamlit page configuration
+st.set_page_config(page_title="GenAI Fund Advisor", layout="wide")
+st.markdown("<h1 style='color:#f97316;'>GenAI Fund Advisor</h1>", unsafe_allow_html=True)
+st.markdown("Ask questions about mutual funds, definitions, or risk metrics.")
+
+# --- Clear conversation button
+if st.button("Clear Conversation"):
+    for key in ("memory", "qa_chain"):
+        if key in st.session_state:
+            del st.session_state[key]
+    st.rerun()
+
+# --- Initialize memory and QA chain
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory(
         memory_key="chat_history",
@@ -102,7 +118,7 @@ if "qa_chain" not in st.session_state:
         output_key="answer"
     )
 
-# Display chat history
+# --- Display chat history
 if st.session_state.memory.chat_memory.messages:
     st.markdown("### Chat History")
     for msg in st.session_state.memory.chat_memory.messages:
@@ -114,11 +130,10 @@ if st.session_state.memory.chat_memory.messages:
         </div>
         """, unsafe_allow_html=True)
 
-# User query input
-query = st.text_area(
-    "Your Question", 
-    placeholder="E.g. What is Sortino Ratio? Or Compare PRBLX and FSPTX",
-    height=100
+# --- User query input (uses Enter to submit)
+query = st.text_input(
+    "Your Question",
+    placeholder="E.g. What are the risks of AGG? Or Compare VWELX and VFIAX"
 )
 
 if query:
@@ -156,7 +171,7 @@ if query:
             with open(pdf_path, "rb") as f:
                 st.download_button("Download PDF", f, file_name="response.pdf")
 
-# CSS styling
+# --- CSS styling
 st.markdown("""
     <style>
         .stApp {
