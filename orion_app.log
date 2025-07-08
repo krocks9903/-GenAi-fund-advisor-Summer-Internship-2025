@@ -1,0 +1,111 @@
+2025-07-08 14:05:14,285 - INFO - Environment variables loaded successfully
+2025-07-08 14:05:21,990 - INFO - Embeddings initialized successfully
+2025-07-08 14:05:22,049 - INFO - Vectorstore loaded successfully
+2025-07-08 14:05:23,930 - INFO - LLM initialized successfully
+2025-07-08 14:05:23,934 - INFO - Application initialized successfully
+2025-07-08 14:05:31,936 - INFO - Environment variables loaded successfully
+2025-07-08 14:05:31,986 - INFO - Application initialized successfully
+2025-07-08 14:05:32,771 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:05:40,862 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:05:40,868 - INFO - Query processed successfully: My client is low risk and is hoping to invest in long term funds give a  list , explain compare give...
+2025-07-08 14:06:38,075 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:38,093 - INFO - Application initialized successfully
+2025-07-08 14:06:40,623 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:40,635 - INFO - Application initialized successfully
+2025-07-08 14:06:42,650 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:42,854 - INFO - Application initialized successfully
+2025-07-08 14:06:51,772 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:51,789 - INFO - Application initialized successfully
+2025-07-08 14:06:54,173 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:54,195 - INFO - Application initialized successfully
+2025-07-08 14:06:58,413 - INFO - Environment variables loaded successfully
+2025-07-08 14:06:58,453 - INFO - Application initialized successfully
+2025-07-08 14:07:01,174 - INFO - Environment variables loaded successfully
+2025-07-08 14:07:01,195 - INFO - Application initialized successfully
+2025-07-08 14:12:06,146 - INFO - Environment variables loaded successfully
+2025-07-08 14:12:06,153 - INFO - Environment variables loaded successfully
+2025-07-08 14:16:46,171 - INFO - Environment variables loaded successfully
+2025-07-08 14:16:46,180 - INFO - Application initialized successfully
+2025-07-08 14:16:50,749 - INFO - Environment variables loaded successfully
+2025-07-08 14:16:50,777 - INFO - Application initialized successfully
+2025-07-08 14:16:51,101 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:16:56,478 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:16:56,483 - INFO - Query processed successfully: give me risk metrics of AGG...
+2025-07-08 14:17:02,927 - INFO - Environment variables loaded successfully
+2025-07-08 14:17:02,943 - INFO - Application initialized successfully
+2025-07-08 14:17:03,565 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:17:03,895 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:17:15,991 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:17:15,995 - INFO - Query processed successfully: give me risk metrics of AGG...
+2025-07-08 14:17:16,007 - INFO - Feedback received: positive for query: give me risk metrics of AGG...
+2025-07-08 14:17:20,141 - INFO - Environment variables loaded successfully
+2025-07-08 14:17:20,167 - INFO - Application initialized successfully
+2025-07-08 14:17:25,784 - INFO - Environment variables loaded successfully
+2025-07-08 14:17:25,794 - INFO - Application initialized successfully
+2025-07-08 14:18:02,328 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:02,359 - INFO - Application initialized successfully
+2025-07-08 14:18:03,268 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:03,274 - INFO - Application initialized successfully
+2025-07-08 14:18:05,158 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:05,171 - INFO - Application initialized successfully
+2025-07-08 14:18:48,746 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:48,776 - INFO - Application initialized successfully
+2025-07-08 14:18:51,249 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:51,258 - INFO - Application initialized successfully
+2025-07-08 14:18:53,773 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:53,793 - INFO - Application initialized successfully
+2025-07-08 14:18:54,166 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:18:56,689 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:18:56,694 - INFO - Query processed successfully: Which fund has the highest alpha over 5 years?...
+2025-07-08 14:18:58,194 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:58,211 - INFO - Application initialized successfully
+2025-07-08 14:18:58,991 - INFO - Environment variables loaded successfully
+2025-07-08 14:18:59,011 - INFO - Application initialized successfully
+2025-07-08 14:19:01,179 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:01,192 - INFO - Application initialized successfully
+2025-07-08 14:19:02,561 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:02,585 - INFO - Application initialized successfully
+2025-07-08 14:19:04,563 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:04,575 - INFO - Application initialized successfully
+2025-07-08 14:19:06,283 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:06,296 - INFO - Application initialized successfully
+2025-07-08 14:19:10,300 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:10,313 - INFO - Application initialized successfully
+2025-07-08 14:19:16,413 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:16,436 - INFO - Application initialized successfully
+2025-07-08 14:19:17,710 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:17,922 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:19:20,123 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:20,127 - INFO - Query processed successfully: What is max drawdown?"...
+2025-07-08 14:19:29,345 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:29,359 - INFO - Application initialized successfully
+2025-07-08 14:19:30,230 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:30,529 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:19:32,986 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:32,990 - INFO - Query processed successfully: What is max drawdown?...
+2025-07-08 14:19:42,555 - INFO - Environment variables loaded successfully
+2025-07-08 14:19:42,573 - INFO - Application initialized successfully
+2025-07-08 14:19:43,344 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:43,595 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:19:46,067 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:19:46,071 - INFO - Query processed successfully: max drawdown...
+2025-07-08 14:23:27,501 - INFO - Environment variables loaded successfully
+2025-07-08 14:23:27,520 - INFO - Application initialized successfully
+2025-07-08 14:23:46,561 - INFO - Environment variables loaded successfully
+2025-07-08 14:23:46,585 - INFO - Application initialized successfully
+2025-07-08 14:23:47,317 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:23:50,736 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:24:00,590 - INFO - Environment variables loaded successfully
+2025-07-08 14:24:00,684 - INFO - Application initialized successfully
+2025-07-08 14:24:05,465 - INFO - Environment variables loaded successfully
+2025-07-08 14:24:05,484 - INFO - Application initialized successfully
+2025-07-08 14:24:06,847 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:24:07,089 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:24:14,711 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:24:42,329 - INFO - Environment variables loaded successfully
+2025-07-08 14:24:42,349 - INFO - Application initialized successfully
+2025-07-08 14:24:46,675 - INFO - Environment variables loaded successfully
+2025-07-08 14:24:46,747 - INFO - Application initialized successfully
+2025-07-08 14:24:47,714 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
+2025-07-08 14:24:47,975 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15 "HTTP/1.1 200 OK"
+2025-07-08 14:24:54,143 - INFO - HTTP Request: POST https://stupr-mb9mv12y-eastus2.cognitiveservices.azure.com/openai/deployments/gpt-4.1/chat/completions?api-version=2025-01-01-preview "HTTP/1.1 200 OK"
