@@ -275,7 +275,7 @@ def add_citations_to_analysis(analysis_text, source_docs):
 
 # --- Enhanced CSS with DEEP BLUE SIDEBAR and larger text box ---
 def load_custom_css():
-    """Load enhanced custom CSS with deep blue sidebar, improved styling, and FIXED feedback visibility"""
+    """Load enhanced custom CSS with deep blue sidebar, improved styling, and WHITE SIDEBAR TEXT"""
     st.markdown("""
     <style>
     /* Import modern fonts */
@@ -440,7 +440,7 @@ def load_custom_css():
         padding-top: 1rem !important;
     }
     
-    /* Sidebar navigation - Deep blue theme with better spacing and layout */
+    /* SIDEBAR NAVIGATION - WHITE TEXT WITH DEEP BLUE THEME */
     .stSidebar .stRadio > div {
         background: transparent !important;
         gap: 0.5rem !important;
@@ -449,7 +449,7 @@ def load_custom_css():
     
     .stSidebar .stRadio > div > label {
         background: rgba(255, 255, 255, 0.08) !important;
-        color: rgba(255, 255, 255, 0.95) !important;
+        color: #ffffff !important;  /* PURE WHITE TEXT */
         padding: 1.2rem 1.5rem !important;
         border-radius: 12px !important;
         margin-bottom: 0.75rem !important;
@@ -470,7 +470,7 @@ def load_custom_css():
     
     .stSidebar .stRadio > div > label:hover {
         background: rgba(255, 255, 255, 0.15) !important;
-        color: #ffffff !important;
+        color: #ffffff !important;  /* PURE WHITE TEXT ON HOVER */
         border-color: rgba(255, 255, 255, 0.3) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
@@ -478,7 +478,7 @@ def load_custom_css():
     
     .stSidebar .stRadio > div > label[data-checked="true"] {
         background: rgba(255, 255, 255, 0.2) !important;
-        color: #ffffff !important;
+        color: #ffffff !important;  /* PURE WHITE TEXT WHEN SELECTED */
         border-color: rgba(255, 255, 255, 0.4) !important;
         font-weight: 600 !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
@@ -490,12 +490,19 @@ def load_custom_css():
         display: none !important;
     }
     
+    /* SIDEBAR TEXT CONTENT - ENSURE WHITE COLOR */
     .stSidebar .stRadio > div > label > div:last-child {
         pointer-events: none !important;
         width: 100% !important;
         text-align: left !important;
         font-size: 1rem !important;
         font-weight: inherit !important;
+        color: #ffffff !important;  /* FORCE WHITE TEXT */
+    }
+    
+    /* Override any text color inheritance */
+    .stSidebar .stRadio > div > label * {
+        color: #ffffff !important;  /* FORCE ALL TEXT TO BE WHITE */
     }
     
     .stSidebar .stRadio > div > label {
@@ -503,7 +510,7 @@ def load_custom_css():
         user-select: none !important;
     }
     
-    /* Sidebar title */
+    /* SIDEBAR TITLE - WHITE TEXT */
     .sidebar-title {
         color: #ffffff !important;
         font-size: 1.1rem !important;
@@ -518,6 +525,16 @@ def load_custom_css():
         padding: 1rem 0 1rem 0 !important;
         text-align: center !important;
         filter: brightness(1.2) !important;
+    }
+    
+    /* ADDITIONAL SIDEBAR TEXT OVERRIDES */
+    .stSidebar p, .stSidebar span, .stSidebar div {
+        color: #ffffff !important;
+    }
+    
+    /* Force white text on all sidebar elements */
+    .stSidebar * {
+        color: #ffffff !important;
     }
     
     /* Main header - ORION animated title */
@@ -931,7 +948,7 @@ def load_custom_css():
     }
     </style>
     """, unsafe_allow_html=True)
-
+    
 def process_query(query: str, qa_chain) -> Dict[str, Any]:
     """Process user query with enhanced formatting for bullets and citations"""
     try:
