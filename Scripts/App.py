@@ -1145,7 +1145,7 @@ def main():
         # Footer
         st.markdown("""
         <div class='footer'>
-        ORION Can Make Mistakes | © 2025 Infosys GenAI Fund Advisor | Powered by Azure OpenAI and LangChain | 
+        | © 2025 Infosys GenAI Fund Advisor | Powered by Azure OpenAI and LangChain | 
         </div>
         """, unsafe_allow_html=True)
         
