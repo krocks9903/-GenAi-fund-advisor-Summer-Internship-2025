@@ -41,7 +41,7 @@ except Exception as e:
 
 # --- Streamlit page config ---
 st.set_page_config(
-    page_title="ORION: Optimal Risk-Investment Outreach Navigator",
+    page_title="ORION: AI-Powered Mutual Fund Advisor",
     layout="wide",
     initial_sidebar_state="expanded",
     page_icon="💼"
@@ -52,12 +52,14 @@ def initialize_session_state():
     """Initialize session state variables with proper defaults"""
     defaults = {
         "documents": set(),
-        "active_page": "💬 GenAI Fund Page",
+        "active_page": "💬 Chat",
         "feedback_log": [],
         "conversation_history": [],
         "last_query": "",
         "error_log": [],
-        "initialized": False
+        "initialized": False,
+        "clear_input": False,  # Flag to handle input clearing
+        "input_key": 0  # Counter for input widget keys
     }
     
     for key, default_value in defaults.items():
@@ -139,13 +141,13 @@ def initialize_llm():
     try:
         llm = AzureChatOpenAI(
             deployment_name=os.getenv("AZURE_CHAT_DEPLOYMENT"),
-            model="gpt-4",  # Fixed model name
+            model="gpt-4",
             azure_endpoint=os.getenv("AZURE_API_BASE"),
             api_key=os.getenv("AZURE_API_KEY"),
             api_version=os.getenv("AZURE_CHAT_VERSION"),
             temperature=0,
-            max_tokens=1000,  # Added token limit
-            timeout=30,  # Added timeout
+            max_tokens=2500,
+            timeout=30,
         )
         logger.info("LLM initialized successfully")
         return llm
@@ -154,148 +156,755 @@ def initialize_llm():
         st.error(f"Failed to initialize language model: {str(e)}")
         return None
 
-# --- Enhanced prompt template ---
+# --- IMPROVED prompt template with bullet points and citations ---
 def get_custom_prompt():
-    """Get the custom prompt template"""
+    """Enhanced prompt template with bullet points for answers and citations for detailed analysis"""
     return PromptTemplate(
         input_variables=["context", "question"],
-        template="""INSTRUCTION: First, provide a direct and concise answer to the user's question in 2-3 sentences and label it as 'Answer:'. After that, clearly label and provide your full explanation or reasoning as 'Explanation:' based on the chain-of-thought steps.
+        template="""You are an expert mutual fund assistant. Provide comprehensive, detailed analysis using ALL available data.
 
-You are an expert mutual fund assistant. For any question about a specific ticker or fund, use this rigorous chain-of-thought reasoning:
+SEARCH ALL CONTEXT thoroughly including JSON files with complete risk metrics, fund metadata, and PDF documents.
 
-Step 1: Identify user intent and which ticker(s) or fund(s) are referenced.
-Step 2: Retrieve and present the most relevant sections from each fund's prospectus summary:
-- For risk questions: Use "Principal Risks" and risk disclosures.
-- For investment approach: Use "Investment Objective" and "Strategy".
-- For cost questions: Use "Fees and Expenses".
-- For suitability: Use "Who Should Invest".
-- For returns: Use "Performance" and historical data.
-Step 3: Supplement your answer with key quantitative risk metrics and fund metadata:
-- **Alpha:** Indicates outperformance vs. benchmark.
-- **Sharpe Ratio:** Return per unit of total risk.
-- **Sortino Ratio:** Penalizes only downside risk.
-- **Treynor Ratio:** Return per unit of market risk (beta).
-- **Standard Deviation:** Measures volatility.
-- **Max Drawdown:** Greatest observed loss.
-- **Expense Ratio, AUM, Inception Date, etc.**
-Step 4: If any risk metric is negative, explain its meaning.
-Step 5: Structure your answer:
-- Start with prospectus summary
-- Follow with key metrics
-- Interpret results clearly
-Step 6: If any requested data is missing, reply:
-"That information is not available in the provided context."
+RESPONSE FORMAT:
 
-Context:
-{context}
+Answer: 
+• [First key point with specific numbers, fund names, and context]
+• [Second key point with quantitative details and reasoning]
+• [Third key point with investment implications]
+• [Fourth key point with risk considerations or additional insights]
 
-Question:
-{question}
+Detailed Analysis:
+
+**Fund Rankings & Metrics:**
+When presenting fund data, use clean tables and include source citations. Format fund information like this:
+
+| Fund | Category | Assets | Yield | Key Details | Source |
+|------|----------|---------|-------|-------------|---------|
+| VFIAX | Large Blend | $770.8B | 1.3% | 100% U.S. large- and mid-cap stocks | [Source: fund_summary.json] |
+| VWELX | Moderate Allocation | $110.9B | 2.1% | U.S. stocks and bonds, some foreign securities | [Source: prospectus_data.pdf] |
+
+**Risk Assessment:** [Source: risk_metrics.json]
+[Analyze volatility, risk-adjusted returns, and downside protection with specific metric interpretations and source citations]
+
+**Investment Implications:** [Source: Multiple documents]
+[Explain what these metrics mean for investors, suitable investor profiles, and practical considerations with citations]
+
+**Additional Considerations:** [Source: fund_metadata.json, performance_data.csv]
+[Include expense ratios, fund strategies, historical performance context, and any caveats with source references]
+
+IMPORTANT GUIDELINES:
+- Structure the Answer section with 4 clear bullet points covering the main response
+- Use specific numbers with units (e.g., "Standard Deviation of 5.05%" not just "5.05")
+- Add [Source: filename] citations after each major section in Detailed Analysis
+- Format fund comparisons in clean tables with source column
+- Explain what metrics mean in practical terms
+- Compare funds directly with quantitative differences
+- Include context about fund strategies and characteristics
+- Provide 4 bullet points for the main Answer section
+- Use detailed analysis in each section with proper citations
+- Always search ALL available context before claiming data is missing
+- Present data in organized, scannable format with proper table formatting and source attribution
+
+Context: {context}
+Question: {question}
 
 Answer:"""
     )
 
-# --- Enhanced CSS ---
+# --- Enhanced answer processing function ---
+def format_answer_with_bullets(answer_text):
+    """Convert answer text to proper bullet points if not already formatted"""
+    if not answer_text:
+        return answer_text
+    
+    # Check if already has bullet points
+    if '•' in answer_text or answer_text.strip().startswith('-') or '<li>' in answer_text:
+        return answer_text
+    
+    # Split into sentences and create bullet points
+    sentences = [s.strip() for s in answer_text.split('.') if s.strip()]
+    
+    if len(sentences) <= 1:
+        return answer_text
+    
+    # Create bullet points (limit to 4-5 main points)
+    bullet_points = []
+    for i, sentence in enumerate(sentences[:4]):  # Limit to 4 points
+        if sentence and len(sentence) > 10:  # Avoid very short fragments
+            # Add period back if not present
+            if not sentence.endswith(('.', '!', '?')):
+                sentence += '.'
+            bullet_points.append(f"• {sentence}")
+    
+    return '\n'.join(bullet_points)
+
+# --- Enhanced citation processing function ---
+def add_citations_to_analysis(analysis_text, source_docs):
+    """Add citations to the detailed analysis sections"""
+    if not analysis_text or not source_docs:
+        return analysis_text
+    
+    # Extract unique sources
+    sources = {}
+    for i, doc in enumerate(source_docs):
+        source = doc.metadata.get("source", f"Document_{i+1}")
+        filename = source.split('/')[-1] if '/' in source else source
+        sources[filename] = source
+    
+    # Define section headers that should get citations
+    section_headers = [
+        "**Fund Rankings & Metrics:**",
+        "**Risk Assessment:**",
+        "**Investment Implications:**",
+        "**Additional Considerations:**",
+        "Fund Rankings & Metrics:",
+        "Risk Assessment:",
+        "Investment Implications:",
+        "Additional Considerations:"
+    ]
+    
+    # Add citations to section headers
+    modified_text = analysis_text
+    for header in section_headers:
+        if header in modified_text:
+            # Add citation after the header
+            citation_html = f' <span class="citation">[Source: Multiple documents]</span>'
+            modified_text = modified_text.replace(header, header + citation_html)
+    
+    return modified_text
+
+# --- Enhanced CSS with lighter blue background AND FIXED FEEDBACK VISIBILITY ---
 def load_custom_css():
-    """Load custom CSS with improved styling"""
+    """Load enhanced custom CSS with light blue background, improved styling, and FIXED feedback visibility"""
     st.markdown("""
     <style>
-    body, .stApp { 
-        background: #eaf4fb; 
-        color: #1c3158; 
-        font-family: 'Segoe UI', sans-serif; 
+    /* Import modern fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Main app styling - Light blue background */
+    .stApp {
+        background: #f0f8ff !important;
+        color: #2c3e50;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-    .stSidebar { 
-        background-color: #1c3158 !important; 
+    
+    /* ENHANCED FEEDBACK MESSAGE STYLING - FIXED VISIBILITY */
+    /* Success message styling - Bright green with white text */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentSuccess"] {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #047857 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        margin: 1rem 0 !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
     }
+    
+    /* Success message icon */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentSuccess"] > div:first-child {
+        color: #ffffff !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+    
+    /* Warning message styling - Orange with white text */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentWarning"] {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #b45309 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+        margin: 1rem 0 !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Warning message icon */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentWarning"] > div:first-child {
+        color: #ffffff !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+    
+    /* Error message styling - Red with white text */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentError"] {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #b91c1c !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+        margin: 1rem 0 !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Error message icon */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentError"] > div:first-child {
+        color: #ffffff !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+    
+    /* Info message styling - Blue with white text */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentInfo"] {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #1d4ed8 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        margin: 1rem 0 !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Info message icon */
+    .stAlert[data-baseweb="notification"] div[data-testid="stNotificationContentInfo"] > div:first-child {
+        color: #ffffff !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+    }
+    
+    /* Custom feedback message styling */
+    .custom-feedback-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #047857 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        margin: 1rem auto !important;
+        text-align: center !important;
+        max-width: 500px !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        animation: slideInFade 0.5s ease-out !important;
+    }
+    
+    .custom-feedback-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: #ffffff !important;
+        border: 2px solid #b45309 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+        margin: 1rem auto !important;
+        text-align: center !important;
+        max-width: 500px !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        animation: slideInFade 0.5s ease-out !important;
+    }
+    
+    /* Animation for feedback messages */
+    @keyframes slideInFade {
+        0% {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Ensure all alert text is visible */
+    .stAlert * {
+        color: inherit !important;
+    }
+    
+    /* Override any conflicting styles */
+    div[data-testid="stAlert"] {
+        background: inherit !important;
+        color: inherit !important;
+    }
+    
+    /* Enhanced Sidebar - Twitter blue colors */
+    .stSidebar {
+        background: linear-gradient(180deg, #1da1f2 0%, #1991db 100%) !important;
+    }
+    
+    .stSidebar > div {
+        background: transparent !important;
+        padding-top: 1rem !important;
+    }
+    
+    /* Sidebar navigation - Twitter blue theme with better spacing and layout */
+    .stSidebar .stRadio > div {
+        background: transparent !important;
+        gap: 0.5rem !important;
+        padding: 0 0.5rem !important;
+    }
+    
+    .stSidebar .stRadio > div > label {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: 12px !important;
+        margin-bottom: 0.75rem !important;
+        transition: all 0.3s ease !important;
+        border: 2px solid rgba(255, 255, 255, 0.15) !important;
+        cursor: pointer !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        min-height: 60px !important;
+        text-align: left !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .stSidebar .stRadio > div > label:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .stSidebar .stRadio > div > label[data-checked="true"] {
+        background: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+        transform: scale(1.02) !important;
+    }
+    
+    /* Remove radio button circles */
+    .stSidebar .stRadio > div > label > div:first-child {
+        display: none !important;
+    }
+    
+    .stSidebar .stRadio > div > label > div:last-child {
+        pointer-events: none !important;
+        width: 100% !important;
+        text-align: left !important;
+        font-size: 1rem !important;
+        font-weight: inherit !important;
+    }
+    
+    .stSidebar .stRadio > div > label {
+        pointer-events: auto !important;
+        user-select: none !important;
+    }
+    
+    /* Sidebar title */
+    .sidebar-title {
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 1.5rem !important;
+        padding: 1rem !important;
+        text-align: center !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .sidebar-logo {
+        padding: 1rem 0 1rem 0 !important;
+        text-align: center !important;
+    }
+    
+    /* Main header - ORION animated title */
     .main-header {
-        color: #1c3158;
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
         text-align: center;
-        background: linear-gradient(135deg, #1c3158, #2d5aa0);
+        margin: 1.5rem 0 2rem 0;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        overflow: hidden;
+    }
+    
+    .orion-title {
+        color: #1a1d29;
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin: 0;
+        letter-spacing: -1px;
+        white-space: nowrap;
+        overflow: hidden;
+        display: inline-block;
+        background: linear-gradient(45deg, #1a1d29, #004578, #0078D4);
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        animation: slideInFromLeft 1.2s ease-out, gradientShift 3s ease-in-out infinite;
     }
-    .search-container {
-        background: white;
-        padding: 1rem;
-        border-radius: 15px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
+    
+    @keyframes slideInFromLeft {
+        0% {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
-    .response-container {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin: 1rem 0;
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
     }
-    .custom-answer {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-left: 4px solid #1c3158;
-        margin: 1rem 0;
-        border-radius: 5px;
+    
+    .orion-subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin: 0.5rem 0 0 0;
+        letter-spacing: 0.5px;
+        animation: fadeInUp 1.5s ease-out 0.3s both;
     }
-    .custom-explanation {
-        background: #f0f8ff;
-        padding: 1rem;
-        border-left: 4px solid #2d5aa0;
-        margin: 1rem 0;
-        border-radius: 5px;
+    
+    @keyframes fadeInUp {
+        0% {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
+    
+    /* Example hint */
     .example-hint {
-        font-size: 0.96rem;
-        color: #1c3158;
-        margin-bottom: 1rem;
-        font-style: italic;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 1.5rem;
         text-align: center;
+        background: transparent !important;
+        padding: 0.5rem 1rem;
+        font-weight: 400;
+        max-width: 768px;
+        margin-left: auto;
+        margin-right: auto;
+        font-style: italic;
     }
-    .error-message {
-        background: #ffe6e6;
-        color: #d32f2f;
-        padding: 1rem;
-        border-radius: 5px;
-        border-left: 4px solid #d32f2f;
+    
+    .example-hint::before {
+        content: "💡";
+        margin-right: 0.5rem;
+        font-style: normal;
+    }
+    
+    /* Input styling */
+    .stTextInput > div > div > input {
+        background: #ffffff !important;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 16px 20px !important;
+        font-size: 16px !important;
+        color: #1a1d29 !important;
+        transition: all 0.3s ease !important;
+        min-height: 56px !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07) !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 400 !important;
+        width: 100% !important;
+        outline: none !important;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #0078D4 !important;
+        box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.15) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .stTextInput > div > div > input::placeholder {
+        color: #9ca3af !important;
+        font-size: 15px !important;
+    }
+    
+    /* Input row */
+    .input-row {
+        display: flex !important;
+        gap: 8px !important;
+        align-items: flex-end !important;
+        width: 100% !important;
+        max-width: 768px !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Button styling */
+    .stButton button, 
+    .stButton > button {
+        background: #0078D4 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 16px !important;
+        font-weight: 600 !important;
+        height: 56px !important;
+        min-height: 56px !important;
+        box-shadow: 0 4px 6px rgba(0, 120, 212, 0.25) !important;
+        transition: all 0.3s ease !important;
+        font-size: 15px !important;
+        padding: 0 20px !important;
+        min-width: 100px !important;
+        font-family: 'Inter', sans-serif !important;
+        cursor: pointer !important;
+    }
+    
+    .stButton button:hover,
+    .stButton > button:hover {
+        background: #106EBE !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(0, 120, 212, 0.4) !important;
+    }
+    
+    /* Clear button orange styling */
+    div[data-testid="column"]:nth-child(3) .stButton > button {
+        background: #f97316 !important;
+        box-shadow: 0 4px 6px rgba(249, 115, 22, 0.25) !important;
+    }
+    
+    div[data-testid="column"]:nth-child(3) .stButton > button:hover {
+        background: #ea580c !important;
+        box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4) !important;
+    }
+    
+    /* Response container */
+    .response-container {
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin: 1.5rem auto;
+        border: 1px solid #e2e8f0;
+        max-width: 768px;
+    }
+    
+    .response-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .response-icon {
+        background: #0078D4;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .response-title {
+        color: #1a1d29;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    /* Answer styling */
+    .custom-answer {
+        background: #f8fafc;
+        padding: 1.25rem;
+        border-left: 3px solid #0078D4;
         margin: 1rem 0;
+        border-radius: 8px;
+        font-weight: 500;
+        position: relative;
+        white-space: pre-line;
     }
-    .success-message {
-        background: #e8f5e8;
-        color: #2e7d32;
+    
+    .custom-answer::before {
+        content: "Answer:";
+        position: absolute;
+        top: -12px;
+        left: 12px;
+        background: #0078D4;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Detailed explanation styling */
+    .custom-explanation {
+        background: #ffffff;
         padding: 1rem;
-        border-radius: 5px;
-        border-left: 4px solid #2e7d32;
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid #10b981;
         margin: 1rem 0;
+        border-radius: 8px;
+        position: relative;
     }
+    
+    .custom-explanation::before {
+        content: "Detailed Analysis:";
+        position: absolute;
+        top: -12px;
+        left: 12px;
+        background: #10b981;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Citation styling */
+    .citation {
+        display: inline-block !important;
+        background: #f0f9ff !important;
+        color: #0369a1 !important;
+        padding: 2px 8px !important;
+        border-radius: 4px !important;
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        margin-left: 0.25rem !important;
+        border: 1px solid #bae6fd !important;
+    }
+    
+    /* Table styling */
+    .custom-explanation table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .custom-explanation table th {
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 2px solid #e5e7eb;
+        font-size: 0.8rem;
+    }
+    
+    .custom-explanation table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #1f2937;
+        font-size: 0.85rem;
+    }
+    
+    /* Feedback buttons */
+    .feedback-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: center;
+        padding-top: 1rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .feedback-container .stButton > button {
+        background: #f8fafc !important;
+        color: #64748b !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        font-weight: 500 !important;
+        font-size: 13px !important;
+        height: 32px !important;
+    }
+    
+    /* Footer */
     .footer {
         text-align: center;
         padding: 2rem;
-        color: #666;
-        font-size: 0.9rem;
-        border-top: 1px solid #ddd;
-        margin-top: 3rem;
+        color: #6b7280;
+        font-size: 0.85rem;
+        max-width: 768px;
+        margin: 3rem auto 0 auto;
     }
-    .feedback-container {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        justify-content: center;
-    }
+    
+    /* Metrics cards */
     .metrics-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        margin: 0.5rem 0;
+        background: #ffffff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin: 1rem 0;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Hide Streamlit elements */
+    .stTextInput > label {
+        display: none !important;
+    }
+    
+    .stAppHeader {
+        display: none !important;
+    }
+    
+    #MainMenu {
+        display: none !important;
+    }
+    
+    footer {
+        display: none !important;
+    }
+    
+    .stDeployButton {
+        display: none !important;
+    }
+    
+    .stToolbar {
+        display: none !important;
+    }
+    
+    /* Main container */
+    .block-container {
+        max-width: 800px !important;
+        padding: 1rem !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .orion-title {
+            font-size: 2rem;
+        }
+        
+        .input-row {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .block-container {
+            padding: 0.5rem !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
 
 def process_query(query: str, qa_chain) -> Dict[str, Any]:
-    """Process user query with fallback to LLM if vector context fails"""
+    """Process user query with enhanced formatting for bullets and citations"""
     try:
         if not query or not query.strip():
             return {"error": "Please enter a valid query"}
@@ -319,10 +928,19 @@ def process_query(query: str, qa_chain) -> Dict[str, Any]:
 
 {query}
 
-Provide a helpful and concise answer based on your general knowledge of mutual funds. If you're unsure, say so."""
+Provide a helpful answer in this format:
+
+Answer:
+• [First key point]
+• [Second key point]  
+• [Third key point]
+• [Fourth key point]
+
+If you're unsure about specific details, say so."""
+            
             llm = st.session_state.qa_chain.llm
             fallback_response = llm.invoke(fallback_prompt)
-            answer = f"**Note:** This answer is based on general knowledge, as no supporting documents were found.**\n\n{fallback_response}"
+            answer = f"**Note:** This answer is based on general knowledge, as no supporting documents were found.\n\n{fallback_response}"
         
         # Save answer to history
         st.session_state.conversation_history.append({
@@ -348,9 +966,9 @@ Provide a helpful and concise answer based on your general knowledge of mutual f
         })
         return {"error": error_msg}
 
-# --- Feedback handling ---
+# --- Enhanced feedback handling with better visibility ---
 def handle_feedback(query: str, feedback_type: str):
-    """Handle user feedback with logging"""
+    """Handle user feedback with enhanced visibility and logging"""
     feedback_entry = {
         "timestamp": datetime.now().isoformat(),
         "question": query,
@@ -361,11 +979,28 @@ def handle_feedback(query: str, feedback_type: str):
     st.session_state.feedback_log.append(feedback_entry)
     logger.info(f"Feedback received: {feedback_type} for query: {query[:50]}...")
     
-    # Show appropriate message
+    # Show enhanced feedback messages with better visibility
     if feedback_type == "positive":
-        st.success("✅ Thank you for your positive feedback!")
+        st.success("✅ Thank you for your positive feedback! We're glad we could help.")
     else:
-        st.warning("⚠️ Thank you for your feedback. We'll work on improving this.")
+        st.warning("⚠️ Thank you for your feedback. We'll work on improving this response.")
+
+# --- Alternative custom feedback display function ---
+def display_feedback_message(message_type: str, message_text: str):
+    """Display feedback message with enhanced visibility using custom HTML"""
+    if message_type == "success":
+        st.markdown(f"""
+        <div class="custom-feedback-success">
+            {message_text}
+        </div>
+        """, unsafe_allow_html=True)
+    
+    elif message_type == "warning":
+        st.markdown(f"""
+        <div class="custom-feedback-warning">
+            {message_text}
+        </div>
+        """, unsafe_allow_html=True)
 
 # --- Initialize everything ---
 def initialize_app():
@@ -396,14 +1031,14 @@ def initialize_app():
         
         if "qa_chain" not in st.session_state:
             retriever = vectorstore.as_retriever(
-                search_kwargs={"k": 5}  # Retrieve top 5 relevant documents
+                search_kwargs={"k": 15}  # Increased to get more context
             )
             st.session_state.qa_chain = ConversationalRetrievalChain.from_llm(
                 llm=llm,
                 retriever=retriever,
                 memory=st.session_state.memory,
                 return_source_documents=True,
-                combine_docs_chain_kwargs={"prompt": get_custom_prompt()},
+                combine_docs_chain_kwargs={"prompt": get_custom_prompt()},  # Using improved prompt
                 output_key="answer"
             )
         
@@ -425,41 +1060,55 @@ def main():
         # Initialize the app
         initialize_app()
         
-        # Sidebar
-        logo_path = "Scripts/infosys_logo.png"
-        if os.path.exists(logo_path):
-            st.sidebar.image(logo_path, use_container_width=True)
-        
-        st.sidebar.markdown(
-            "<span style='font-size:1.15em; font-weight:600; color:#ffffff;'>ORION: Optimal Risk-Investment Outreach Navigator</span>",
-            unsafe_allow_html=True,
-        )
-        
-        # Sidebar navigation
-        sidebar_options = [
-            "👤 Client Names",
-            "💬 GenAI Fund Page", 
-            "📄 Documents",
-            "📊 Analytics",
-            "⚙️ Settings"
-        ]
-        
-        selected = st.sidebar.radio(
-            "Menu",
-            sidebar_options,
-            index=sidebar_options.index(st.session_state.get("active_page", "💬 GenAI Fund Page")),
-            label_visibility="collapsed"
-        )
-        st.session_state["active_page"] = selected
+        # Enhanced Sidebar
+        with st.sidebar:
+            # Logo section
+            logo_path = "Scripts/infosys_logo.png"
+            if os.path.exists(logo_path):
+                st.markdown('<div class="sidebar-logo">', unsafe_allow_html=True)
+                st.image(logo_path, use_container_width=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Clean title
+            st.markdown(
+                '<div class="sidebar-title"> </div>',
+                unsafe_allow_html=True,
+            )
+            
+            # Enhanced navigation with better styling
+            sidebar_options = [
+                "💬 Chat",
+                "📊 Analytics", 
+                "⚙️ Settings"
+            ]
+            
+            # Get current page for proper selection
+            current_page = st.session_state.get("active_page", "💬 Chat")
+            if current_page == "💬 GenAI Fund Page":
+                current_page = "💬 Chat"
+            
+            try:
+                current_index = sidebar_options.index(current_page)
+            except ValueError:
+                current_index = 0  # Default to Chat if not found
+            
+            selected = st.radio(
+                "Navigation",
+                sidebar_options,
+                index=current_index,
+                label_visibility="collapsed",
+                key="sidebar_navigation"
+            )
+            
+            # Update session state with selected page
+            st.session_state["active_page"] = selected
         
         # Main content area
-        if selected == "💬 GenAI Fund Page":
+        if st.session_state["active_page"] == "💬 Chat":
             render_chat_page()
-        elif selected == "📄 Documents":
-            render_documents_page()
-        elif selected == "📊 Analytics":
+        elif st.session_state["active_page"] == "📊 Analytics":
             render_analytics_page()
-        elif selected == "⚙️ Settings":
+        elif st.session_state["active_page"] == "⚙️ Settings":
             render_settings_page()
         else:
             st.info("This page is under development.")
@@ -467,7 +1116,7 @@ def main():
         # Footer
         st.markdown("""
         <div class='footer'>
-            © 2025 Infosys GenAI Fund Advisor | Powered by Azure OpenAI and LangChain
+        ORION Can Make Mistakes | © 2025 Infosys GenAI Fund Advisor | Powered by Azure OpenAI and LangChain | 
         </div>
         """, unsafe_allow_html=True)
         
@@ -477,43 +1126,76 @@ def main():
         st.error("Please refresh the page or contact support if the issue persists.")
 
 def render_chat_page():
-    """Render the main chat interface"""
-    st.markdown("<h1 class='main-header'>ORION: Optimal Risk-Investment Outreach Navigator</h1>", 
-                unsafe_allow_html=True)
+    """Render the main chat interface with enhanced bullet points and citations"""
+    # Updated header with the new title
+    st.markdown("""
+    <div class='main-header'>
+        <h1 class='orion-title'>ORION: AI-Powered Mutual Fund Advisor</h1>
+        <p class='orion-subtitle'>Optimal Risk-Investment Outreach Navigator</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Search container
-    with st.container():
-        st.markdown('<div class="search-container">', unsafe_allow_html=True)
-        
-        st.markdown("<div class='example-hint'>💡 Try: \"Compare VFIAX and VWELX\", \"What is max drawdown?\", \"Top 3 low-risk funds\"</div>", 
-                   unsafe_allow_html=True)
-        
-        # Input and clear button
-        col_input, col_clear = st.columns([8, 1])
-        
-        with col_input:
-            query = st.text_input(
-                "Search", 
-                placeholder="🔍 Ask your fund question…", 
-                key="chat_input", 
-                label_visibility="collapsed"
-            )
-        
-        with col_clear:
-            if st.button("🗑️", help="Clear Conversation", use_container_width=True):
-                # Clear conversation state
-                for key in ("memory", "qa_chain", "conversation_history"):
-                    if key in st.session_state:
-                        if key == "conversation_history":
-                            st.session_state[key] = []
-                        else:
-                            del st.session_state[key]
-                st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Clean input section - NO CONTAINER BOX
+    # Example hint - now looks like simple text, not an input box
+    st.markdown("<div class='example-hint'>Try: \"Compare VFIAX and VWELX risk metrics\", \"What is VBIAX alpha?\", \"Show me VBTLX performance data\"</div>", 
+               unsafe_allow_html=True)
     
-    # Process query
-    if query and query.strip():
+    # Handle clear flag - clear input before creating new widget
+    if st.session_state.get("clear_input", False):
+        st.session_state.clear_input = False
+        st.session_state.input_key += 1  # Change key to force widget recreation
+    
+    # Input row with text input and buttons
+    st.markdown('<div class="input-row">', unsafe_allow_html=True)
+    col_input, col_submit, col_clear = st.columns([6.5, 1.5, 1.5])
+    
+    with col_input:
+        # Use dynamic key to allow input clearing
+        input_key = f"chat_input_{st.session_state.input_key}"
+        query = st.text_input(
+            "Search", 
+            placeholder="Ask about fund performance, risks, or comparisons...", 
+            key=input_key, 
+            label_visibility="collapsed"
+        )
+    
+    with col_submit:
+        submit_clicked = st.button("Submit", key="submit_btn", use_container_width=True, help="Submit your query")
+    
+    with col_clear:
+        clear_clicked = st.button("Clear", key="clear_btn", use_container_width=True, help="Clear conversation history")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Handle clear button - FIXED to avoid session state modification error
+    if clear_clicked:
+        # Clear conversation state more thoroughly
+        keys_to_clear = ["memory", "qa_chain", "conversation_history", "last_query"]
+        for key in keys_to_clear:
+            if key in st.session_state:
+                if key == "conversation_history":
+                    st.session_state[key] = []
+                else:
+                    del st.session_state[key]
+        
+        # Set flag to clear input on next rerun (instead of directly modifying session state)
+        st.session_state.clear_input = True
+        
+        # Force reinitialization on next query
+        st.session_state.initialized = False
+        
+        # Show success message with enhanced visibility
+        st.success("✅ Conversation cleared successfully!")
+        
+        # Force a clean restart
+        st.rerun()
+    
+    # Process query (either from Enter key or Submit button)
+    if (query and query.strip()) or submit_clicked:
+        if not query or not query.strip():
+            st.warning("⚠️ Please enter a question before submitting.")
+            return
+            
         if not st.session_state.get("initialized", False):
             st.error("Application not properly initialized. Please refresh the page.")
             return
@@ -538,51 +1220,68 @@ def render_chat_page():
                 st.warning("⚠️ No relevant data found for that question. Please try rephrasing your query.")
             else:
                 st.markdown('<div class="response-container">', unsafe_allow_html=True)
-                st.markdown("<h3 style='color:#1c3158; margin-bottom:1rem;'>📋 Response</h3>", 
-                           unsafe_allow_html=True)
                 
-                # Parse and display answer
-                if "Explanation:" in answer:
-                    parts = answer.split("Explanation:", 1)
+                # Response header
+                st.markdown('''
+                <div class="response-header">
+                    <div class="response-icon">AI</div>
+                    <h3 class="response-title">Investment Analysis</h3>
+                </div>
+                ''', unsafe_allow_html=True)
+                
+                # Parse and display answer with enhanced formatting
+                if "Detailed Analysis:" in answer:
+                    parts = answer.split("Detailed Analysis:", 1)
                     answer_part = parts[0].replace("Answer:", "").strip()
                     explanation_part = parts[1].strip()
                     
-                    st.markdown(f'<div class="custom-answer"><strong>Answer:</strong> {answer_part}</div>', 
+                    # Format answer with bullet points
+                    formatted_answer = format_answer_with_bullets(answer_part)
+                    
+                    # Add citations to detailed analysis
+                    formatted_explanation = add_citations_to_analysis(explanation_part, source_docs)
+                    
+                    st.markdown(f'<div class="custom-answer">{formatted_answer}</div>', 
                                unsafe_allow_html=True)
-                    st.markdown(f'<div class="custom-explanation"><strong>Explanation:</strong> {explanation_part}</div>', 
+                    st.markdown(f'<div class="custom-explanation">{formatted_explanation}</div>', 
                                unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="custom-answer">{answer}</div>', 
+                    # Format single response with bullet points
+                    formatted_answer = format_answer_with_bullets(answer)
+                    st.markdown(f'<div class="custom-answer">{formatted_answer}</div>', 
                                unsafe_allow_html=True)
                 
-                # Feedback section
+                # Show source information
+                if source_docs:
+                    with st.expander(f"📚 Sources Used ({len(source_docs)} documents)"):
+                        sources_used = set()
+                        for doc in source_docs:
+                            source = doc.metadata.get("source", "Unknown")
+                            if source not in sources_used:
+                                sources_used.add(source)
+                                st.write(f"• {source}")
+                
+                # Enhanced feedback section with better visibility
                 st.markdown('<div class="feedback-container">', unsafe_allow_html=True)
                 feedback_col1, feedback_col2 = st.columns(2)
                 
                 with feedback_col1:
                     if st.button("👍 Helpful", key="positive_feedback", use_container_width=True):
                         handle_feedback(query, "positive")
+                        # Alternative: Use custom feedback display
+                        # display_feedback_message("success", "✅ Thank you for your positive feedback! We're glad we could help.")
                 
                 with feedback_col2:
                     if st.button("👎 Not Helpful", key="negative_feedback", use_container_width=True):
                         handle_feedback(query, "negative")
+                        # Alternative: Use custom feedback display
+                        # display_feedback_message("warning", "⚠️ Thank you for your feedback. We'll work on improving this response.")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
                 # Update last query
                 st.session_state["last_query"] = query
-
-def render_documents_page():
-    """Render documents page"""
-    st.markdown("<h1 class='main-header'>📄 Documents</h1>", unsafe_allow_html=True)
-    
-    if st.session_state.get("documents"):
-        st.markdown("### Referenced Documents")
-        for doc in st.session_state["documents"]:
-            st.markdown(f"- {doc}")
-    else:
-        st.info("No documents have been referenced yet. Start a conversation to see referenced documents.")
 
 def render_analytics_page():
     """Render analytics dashboard"""
@@ -651,17 +1350,34 @@ def render_settings_page():
     with col1:
         if st.button("Clear Conversation History", use_container_width=True):
             st.session_state.conversation_history = []
-            st.success("Conversation history cleared!")
+            st.success("✅ Conversation history cleared!")
     
     with col2:
         if st.button("Clear Feedback Log", use_container_width=True):
             st.session_state.feedback_log = []
-            st.success("Feedback log cleared!")
+            st.success("✅ Feedback log cleared!")
     
     # Debug information
     with st.expander("Debug Information"):
         st.write("Session State Keys:", list(st.session_state.keys()))
         st.write("Error Log:", st.session_state.get("error_log", []))
+        
+        # Show vectorstore stats
+        if st.session_state.get("initialized", False):
+            try:
+                vectorstore = initialize_vectorstore()
+                if vectorstore:
+                    vector_count = vectorstore.index.ntotal
+                    st.write(f"Vectorstore Status: {vector_count} vectors loaded")
+                    
+                    # Quick test search
+                    test_results = vectorstore.similarity_search("VFIAX", k=3)
+                    st.write(f"Quick Test Search (VFIAX): {len(test_results)} results found")
+                    
+                    if test_results:
+                        st.write("Sample result source:", test_results[0].metadata.get('source', 'Unknown'))
+            except Exception as e:
+                st.write(f"Vectorstore test failed: {e}")
 
 if __name__ == "__main__":
     main()
