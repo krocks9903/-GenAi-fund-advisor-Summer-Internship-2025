@@ -273,9 +273,9 @@ def add_citations_to_analysis(analysis_text, source_docs):
     
     return modified_text
 
-# --- Enhanced CSS with lighter blue background AND FIXED FEEDBACK VISIBILITY ---
+# --- Enhanced CSS with DEEP BLUE SIDEBAR and larger text box ---
 def load_custom_css():
-    """Load enhanced custom CSS with light blue background, improved styling, and FIXED feedback visibility"""
+    """Load enhanced custom CSS with deep blue sidebar, improved styling, and FIXED feedback visibility"""
     st.markdown("""
     <style>
     /* Import modern fonts */
@@ -429,9 +429,10 @@ def load_custom_css():
         color: inherit !important;
     }
     
-    /* Enhanced Sidebar - Twitter blue colors */
+    /* ENHANCED SIDEBAR - DEEP BLUE PRIMARY COLORS */
     .stSidebar {
-        background: linear-gradient(180deg, #1da1f2 0%, #1991db 100%) !important;
+        background: linear-gradient(180deg, #003366 0%, #001144 100%) !important;
+        border-right: 2px solid #004080 !important;
     }
     
     .stSidebar > div {
@@ -439,7 +440,7 @@ def load_custom_css():
         padding-top: 1rem !important;
     }
     
-    /* Sidebar navigation - Twitter blue theme with better spacing and layout */
+    /* Sidebar navigation - Deep blue theme with better spacing and layout */
     .stSidebar .stRadio > div {
         background: transparent !important;
         gap: 0.5rem !important;
@@ -447,13 +448,13 @@ def load_custom_css():
     }
     
     .stSidebar .stRadio > div > label {
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
         color: rgba(255, 255, 255, 0.95) !important;
-        padding: 1rem 1.5rem !important;
+        padding: 1.2rem 1.5rem !important;
         border-radius: 12px !important;
         margin-bottom: 0.75rem !important;
         transition: all 0.3s ease !important;
-        border: 2px solid rgba(255, 255, 255, 0.15) !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
         cursor: pointer !important;
         font-weight: 500 !important;
         font-size: 1rem !important;
@@ -461,25 +462,26 @@ def load_custom_css():
         align-items: center !important;
         justify-content: flex-start !important;
         width: 100% !important;
-        min-height: 60px !important;
+        min-height: 65px !important;
         text-align: left !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        backdrop-filter: blur(10px) !important;
     }
     
     .stSidebar .stRadio > div > label:hover {
-        background: rgba(255, 255, 255, 0.2) !important;
+        background: rgba(255, 255, 255, 0.15) !important;
         color: #ffffff !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
     }
     
     .stSidebar .stRadio > div > label[data-checked="true"] {
-        background: rgba(255, 255, 255, 0.25) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         color: #ffffff !important;
-        border-color: rgba(255, 255, 255, 0.5) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
         transform: scale(1.02) !important;
     }
     
@@ -515,6 +517,7 @@ def load_custom_css():
     .sidebar-logo {
         padding: 1rem 0 1rem 0 !important;
         text-align: center !important;
+        filter: brightness(1.2) !important;
     }
     
     /* Main header - ORION animated title */
@@ -604,21 +607,23 @@ def load_custom_css():
         font-style: normal;
     }
     
-    /* Input styling */
+    /* ENHANCED INPUT STYLING - LARGER TEXT BOX */
     .stTextInput > div > div > input {
         background: #ffffff !important;
         border: 2px solid #e2e8f0 !important;
         border-radius: 16px !important;
-        padding: 16px 20px !important;
-        font-size: 16px !important;
+        padding: 20px 24px !important;
+        font-size: 17px !important;
         color: #1a1d29 !important;
         transition: all 0.3s ease !important;
-        min-height: 56px !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07) !important;
+        min-height: 68px !important;
+        height: 68px !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08) !important;
         font-family: 'Inter', sans-serif !important;
         font-weight: 400 !important;
         width: 100% !important;
         outline: none !important;
+        line-height: 1.4 !important;
     }
     
     .stTextInput > div > div > input:focus {
@@ -629,20 +634,30 @@ def load_custom_css():
     
     .stTextInput > div > div > input::placeholder {
         color: #9ca3af !important;
-        font-size: 15px !important;
+        font-size: 16px !important;
+        font-weight: 400 !important;
+    }
+    
+    /* Input container adjustments */
+    .stTextInput > div {
+        height: auto !important;
+    }
+    
+    .stTextInput > div > div {
+        height: auto !important;
     }
     
     /* Input row */
     .input-row {
         display: flex !important;
-        gap: 8px !important;
+        gap: 10px !important;
         align-items: flex-end !important;
         width: 100% !important;
         max-width: 768px !important;
         margin: 0 auto !important;
     }
     
-    /* Button styling */
+    /* BUTTON STYLING - Submit Blue, Clear Orange */
     .stButton button, 
     .stButton > button {
         background: #0078D4 !important;
@@ -650,13 +665,13 @@ def load_custom_css():
         border: none !important;
         border-radius: 16px !important;
         font-weight: 600 !important;
-        height: 56px !important;
-        min-height: 56px !important;
-        box-shadow: 0 4px 6px rgba(0, 120, 212, 0.25) !important;
+        height: 68px !important;
+        min-height: 68px !important;
+        box-shadow: 0 4px 8px rgba(0, 120, 212, 0.25) !important;
         transition: all 0.3s ease !important;
-        font-size: 15px !important;
-        padding: 0 20px !important;
-        min-width: 100px !important;
+        font-size: 16px !important;
+        padding: 0 24px !important;
+        min-width: 120px !important;
         font-family: 'Inter', sans-serif !important;
         cursor: pointer !important;
     }
@@ -668,10 +683,10 @@ def load_custom_css():
         box-shadow: 0 6px 16px rgba(0, 120, 212, 0.4) !important;
     }
     
-    /* Clear button orange styling */
+    /* Clear button orange styling - Target the third column specifically */
     div[data-testid="column"]:nth-child(3) .stButton > button {
         background: #f97316 !important;
-        box-shadow: 0 4px 6px rgba(249, 115, 22, 0.25) !important;
+        box-shadow: 0 4px 8px rgba(249, 115, 22, 0.25) !important;
     }
     
     div[data-testid="column"]:nth-child(3) .stButton > button:hover {
@@ -893,11 +908,25 @@ def load_custom_css():
         
         .input-row {
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         
         .block-container {
             padding: 0.5rem !important;
+        }
+        
+        .stTextInput > div > div > input {
+            min-height: 60px !important;
+            height: 60px !important;
+            padding: 18px 20px !important;
+            font-size: 16px !important;
+        }
+        
+        .stButton button, 
+        .stButton > button {
+            height: 60px !important;
+            min-height: 60px !important;
+            font-size: 15px !important;
         }
     }
     </style>
