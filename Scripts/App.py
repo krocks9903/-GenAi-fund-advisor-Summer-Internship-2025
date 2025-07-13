@@ -273,9 +273,9 @@ def add_citations_to_analysis(analysis_text, source_docs):
     
     return modified_text
 
-# --- Enhanced CSS with DEEP BLUE SIDEBAR and larger text box ---
+# --- Enhanced CSS with FIXED ORANGE CLEAR BUTTON and NO WHITE BOX ---
 def load_custom_css():
-    """Load enhanced custom CSS with deep blue sidebar, improved styling, and WHITE SIDEBAR TEXT"""
+    """Load enhanced custom CSS with orange clear button and removed white response container"""
     st.markdown("""
     <style>
     /* Import modern fonts */
@@ -700,26 +700,41 @@ def load_custom_css():
         box-shadow: 0 6px 16px rgba(0, 120, 212, 0.4) !important;
     }
     
-    /* Clear button orange styling - Target the third column specifically */
-    div[data-testid="column"]:nth-child(3) .stButton > button {
+    /* FIXED: Clear button orange styling - More specific targeting */
+    button[kind="secondary"] {
         background: #f97316 !important;
+        color: white !important;
         box-shadow: 0 4px 8px rgba(249, 115, 22, 0.25) !important;
     }
     
-    div[data-testid="column"]:nth-child(3) .stButton > button:hover {
+    button[kind="secondary"]:hover {
         background: #ea580c !important;
         box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4) !important;
     }
     
-    /* Response container */
+    /* Alternative targeting for clear button */
+    .stButton:has(button:contains("Clear")) button,
+    button:contains("Clear") {
+        background: #f97316 !important;
+        color: white !important;
+        box-shadow: 0 4px 8px rgba(249, 115, 22, 0.25) !important;
+    }
+    
+    .stButton:has(button:contains("Clear")) button:hover,
+    button:contains("Clear"):hover {
+        background: #ea580c !important;
+        box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4) !important;
+    }
+    
+    /* REMOVED: Response container - No more white box around output */
     .response-container {
-        background: #ffffff;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        margin: 1.5rem auto;
-        border: 1px solid #e2e8f0;
-        max-width: 768px;
+        background: transparent !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        margin: 1.5rem auto !important;
+        border: none !important;
+        max-width: 768px !important;
     }
     
     .response-header {
@@ -727,7 +742,11 @@ def load_custom_css():
         align-items: center;
         margin-bottom: 1rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        background: #ffffff;
+        padding: 1rem 1.5rem 0.75rem 1.5rem;
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     
     .response-icon {
@@ -948,7 +967,7 @@ def load_custom_css():
     }
     </style>
     """, unsafe_allow_html=True)
-    
+
 def process_query(query: str, qa_chain) -> Dict[str, Any]:
     """Process user query with enhanced formatting for bullets and citations"""
     try:
@@ -1209,7 +1228,7 @@ def render_chat_page():
         submit_clicked = st.button("Submit", key="submit_btn", use_container_width=True, help="Submit your query")
     
     with col_clear:
-        clear_clicked = st.button("Clear", key="clear_btn", use_container_width=True, help="Clear conversation history")
+        clear_clicked = st.button("Clear", key="clear_btn", use_container_width=True, help="Clear conversation history", type="secondary")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
