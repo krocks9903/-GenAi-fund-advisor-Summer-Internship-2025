@@ -156,9 +156,9 @@ def initialize_llm():
         st.error(f"Failed to initialize language model: {str(e)}")
         return None
 
-# --- IMPROVED prompt template with bullet points and citations ---
+# --- IMPROVED prompt template with concise answer and detailed analysis ---
 def get_custom_prompt():
-    """Enhanced prompt template with bullet points for answers and citations for detailed analysis"""
+    """Enhanced prompt template with concise answer paragraph and detailed analysis sections"""
     return PromptTemplate(
         input_variables=["context", "question"],
         template="""You are an expert mutual fund assistant. Provide comprehensive, detailed analysis using ALL available data.
@@ -168,10 +168,7 @@ SEARCH ALL CONTEXT thoroughly including JSON files with complete risk metrics, f
 RESPONSE FORMAT:
 
 Answer: 
-• [First key point with specific numbers, fund names, and context]
-• [Second key point with quantitative details and reasoning]
-• [Third key point with investment implications]
-• [Fourth key point with risk considerations or additional insights]
+[Provide a single, concise paragraph (3-4 sentences max) that directly answers the user's question with the most important information. Include specific fund names and key numbers but keep it brief and focused.]
 
 Detailed Analysis:
 
@@ -193,14 +190,14 @@ When presenting fund data, use clean tables and include source citations. Format
 [Include expense ratios, fund strategies, historical performance context, and any caveats with source references]
 
 IMPORTANT GUIDELINES:
-- Structure the Answer section with 4 clear bullet points covering the main response
+- Keep the Answer section to ONE concise paragraph (3-4 sentences maximum)
+- The Answer should directly address the user's question with key facts and numbers
 - Use specific numbers with units (e.g., "Standard Deviation of 5.05%" not just "5.05")
 - Add [Source: filename] citations after each major section in Detailed Analysis
 - Format fund comparisons in clean tables with source column
 - Explain what metrics mean in practical terms
 - Compare funds directly with quantitative differences
 - Include context about fund strategies and characteristics
-- Provide 4 bullet points for the main Answer section
 - Use detailed analysis in each section with proper citations
 - Always search ALL available context before claiming data is missing
 - Present data in organized, scannable format with proper table formatting and source attribution
@@ -211,34 +208,37 @@ Question: {question}
 Answer:"""
     )
 
-# --- Enhanced answer processing function ---
-def format_answer_with_bullets(answer_text):
-    """Convert answer text to proper bullet points if not already formatted"""
+# --- Modified answer processing function for concise answers ---
+def format_answer_paragraph(answer_text):
+    """Format answer as a single concise paragraph"""
     if not answer_text:
         return answer_text
     
-    # Check if already has bullet points
-    if '•' in answer_text or answer_text.strip().startswith('-') or '<li>' in answer_text:
+    # Clean up the answer text
+    answer_text = answer_text.strip()
+    
+    # If it already looks like a paragraph, return as is
+    if not ('•' in answer_text or answer_text.startswith('-') or '<li>' in answer_text):
         return answer_text
     
-    # Split into sentences and create bullet points
-    sentences = [s.strip() for s in answer_text.split('.') if s.strip()]
+    # Convert bullet points back to paragraph format
+    if '•' in answer_text:
+        # Remove bullet points and join sentences
+        sentences = [s.strip().lstrip('•').strip() for s in answer_text.split('\n') if s.strip() and not s.strip().startswith('•')]
+        # Join with proper spacing and periods
+        cleaned_sentences = []
+        for sentence in sentences:
+            if sentence and len(sentence) > 5:  # Avoid very short fragments
+                if not sentence.endswith(('.', '!', '?')):
+                    sentence += '.'
+                cleaned_sentences.append(sentence)
+        
+        # Join into a single paragraph, limiting to first 3-4 sentences for conciseness
+        return ' '.join(cleaned_sentences[:4])
     
-    if len(sentences) <= 1:
-        return answer_text
-    
-    # Create bullet points (limit to 4-5 main points)
-    bullet_points = []
-    for i, sentence in enumerate(sentences[:4]):  # Limit to 4 points
-        if sentence and len(sentence) > 10:  # Avoid very short fragments
-            # Add period back if not present
-            if not sentence.endswith(('.', '!', '?')):
-                sentence += '.'
-            bullet_points.append(f"• {sentence}")
-    
-    return '\n'.join(bullet_points)
+    return answer_text
 
-# --- Enhanced citation processing function ---
+# --- Enhanced citation processing function (unchanged) ---
 def add_citations_to_analysis(analysis_text, source_docs):
     """Add citations to the detailed analysis sections"""
     if not analysis_text or not source_docs:
@@ -273,9 +273,9 @@ def add_citations_to_analysis(analysis_text, source_docs):
     
     return modified_text
 
-# --- Enhanced CSS with FIXED ORANGE CLEAR BUTTON and NO WHITE BOX ---
+# --- Enhanced CSS with smaller answer box ---
 def load_custom_css():
-    """Load enhanced custom CSS with orange clear button and removed white response container"""
+    """Load enhanced custom CSS with smaller answer container"""
     st.markdown("""
     <style>
     /* Import modern fonts */
@@ -770,16 +770,19 @@ def load_custom_css():
         margin: 0;
     }
     
-    /* Answer styling */
+    /* MODIFIED: Smaller, more concise answer styling */
     .custom-answer {
         background: #f8fafc;
-        padding: 1.25rem;
+        padding: 1rem 1.25rem;
         border-left: 3px solid #0078D4;
         margin: 1rem 0;
         border-radius: 8px;
-        font-weight: 500;
+        font-weight: 400;
         position: relative;
-        white-space: pre-line;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        max-height: none;
+        overflow: visible;
     }
     
     .custom-answer::before {
@@ -796,7 +799,7 @@ def load_custom_css():
         letter-spacing: 0.5px;
     }
     
-    /* Detailed explanation styling */
+    /* Detailed explanation styling - unchanged */
     .custom-explanation {
         background: #ffffff;
         padding: 1rem;
@@ -969,7 +972,7 @@ def load_custom_css():
     """, unsafe_allow_html=True)
 
 def process_query(query: str, qa_chain) -> Dict[str, Any]:
-    """Process user query with enhanced formatting for bullets and citations"""
+    """Process user query with enhanced formatting for concise answers and detailed analysis"""
     try:
         if not query or not query.strip():
             return {"error": "Please enter a valid query"}
@@ -995,11 +998,8 @@ def process_query(query: str, qa_chain) -> Dict[str, Any]:
 
 Provide a helpful answer in this format:
 
-Answer:
-• [First key point]
-• [Second key point]  
-• [Third key point]
-• [Fourth key point]
+Answer: 
+[Provide a single, concise paragraph (3-4 sentences max) that directly answers the user's question with the most important information.]
 
 If you're unsure about specific details, say so."""
             
@@ -1191,7 +1191,7 @@ def main():
         st.error("Please refresh the page or contact support if the issue persists.")
 
 def render_chat_page():
-    """Render the main chat interface with enhanced bullet points and citations"""
+    """Render the main chat interface with concise answers and detailed analysis"""
     # Updated header with the new title
     st.markdown("""
     <div class='main-header'>
@@ -1300,8 +1300,8 @@ def render_chat_page():
                     answer_part = parts[0].replace("Answer:", "").strip()
                     explanation_part = parts[1].strip()
                     
-                    # Format answer with bullet points
-                    formatted_answer = format_answer_with_bullets(answer_part)
+                    # Format answer as concise paragraph
+                    formatted_answer = format_answer_paragraph(answer_part)
                     
                     # Add citations to detailed analysis
                     formatted_explanation = add_citations_to_analysis(explanation_part, source_docs)
@@ -1311,8 +1311,8 @@ def render_chat_page():
                     st.markdown(f'<div class="custom-explanation">{formatted_explanation}</div>', 
                                unsafe_allow_html=True)
                 else:
-                    # Format single response with bullet points
-                    formatted_answer = format_answer_with_bullets(answer)
+                    # Format single response as concise paragraph
+                    formatted_answer = format_answer_paragraph(answer)
                     st.markdown(f'<div class="custom-answer">{formatted_answer}</div>', 
                                unsafe_allow_html=True)
                 
@@ -1333,14 +1333,10 @@ def render_chat_page():
                 with feedback_col1:
                     if st.button("👍 Helpful", key="positive_feedback", use_container_width=True):
                         handle_feedback(query, "positive")
-                        # Alternative: Use custom feedback display
-                        # display_feedback_message("success", "✅ Thank you for your positive feedback! We're glad we could help.")
                 
                 with feedback_col2:
                     if st.button("👎 Not Helpful", key="negative_feedback", use_container_width=True):
                         handle_feedback(query, "negative")
-                        # Alternative: Use custom feedback display
-                        # display_feedback_message("warning", "⚠️ Thank you for your feedback. We'll work on improving this response.")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
