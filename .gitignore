@@ -8,3 +8,9 @@ chromedriver.exe
 *.pyc
 __pycache__/
 venv/
+
+# os / logs / local caches
+.DS_Store
+*.log
+logs/
+cache/
